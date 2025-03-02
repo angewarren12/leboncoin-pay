@@ -1,6 +1,4 @@
 
-import { supabase } from '@/lib/supabase';
-
 interface UserSession {
   email?: string;
   password?: string;
@@ -27,7 +25,7 @@ export const saveToSession = (key: string, data: any): void => {
   try {
     sessionStorage.setItem(key, JSON.stringify(data));
   } catch (error) {
-    console.error("Erreur lors de la sauvegarde dans la session:", error);
+    console.error("Error saving to session:", error);
   }
 };
 
@@ -37,7 +35,7 @@ export const getFromSession = (key: string): any => {
     const item = sessionStorage.getItem(key);
     return item ? JSON.parse(item) : null;
   } catch (error) {
-    console.error("Erreur lors de la récupération depuis la session:", error);
+    console.error("Error getting from session:", error);
     return null;
   }
 };
@@ -49,11 +47,11 @@ export const updateUserSession = (userData: Partial<UserSession>): void => {
     const updatedData = { ...currentData, ...userData };
     saveToSession("userData", updatedData);
   } catch (error) {
-    console.error("Erreur lors de la mise à jour de la session utilisateur:", error);
+    console.error("Error updating user session:", error);
   }
 };
 
-// Sauvegarde les données utilisateur dans Supabase
+// Sauvegarde les données utilisateur dans localStorage (simulation BDD)
 export const saveUserDataToJson = async (): Promise<void> => {
   try {
     const userData = getFromSession("userData");
@@ -71,96 +69,57 @@ export const saveUserDataToJson = async (): Promise<void> => {
       montant: userData.montant || generateRandomAmount()
     };
     
-    console.log("Données utilisateur à sauvegarder:", updatedUserData);
+    console.log("Données utilisateur sauvegardées:", updatedUserData);
     
-    // Vérifier si l'utilisateur existe déjà
-    const { data: existingUser, error: selectError } = await supabase
-      .from('users')
-      .select('*')
-      .eq('email', updatedUserData.email)
-      .single();
+    // Ajoutons les données au stockage local pour simuler une base de données
+    const allUsers = getAllUsersData();
     
-    if (selectError && selectError.code !== 'PGRST116') {
-      console.error("Erreur lors de la vérification de l'utilisateur:", selectError);
-      throw selectError;
-    }
+    // Vérifier si l'utilisateur existe déjà (par email)
+    const existingUserIndex = allUsers.findIndex(user => user.email === updatedUserData.email);
     
-    let result;
-    
-    if (existingUser) {
-      // Mettre à jour l'utilisateur existant
-      const { data, error } = await supabase
-        .from('users')
-        .update(updatedUserData)
-        .eq('email', updatedUserData.email)
-        .select();
-      
-      if (error) {
-        console.error("Erreur lors de la mise à jour des données utilisateur:", error);
-        throw error;
-      }
-      
-      result = data;
+    if (existingUserIndex !== -1) {
+      // Mise à jour de l'utilisateur existant avec fusion des données
+      allUsers[existingUserIndex] = {
+        ...allUsers[existingUserIndex],
+        ...updatedUserData
+      };
     } else {
-      // Insérer un nouvel utilisateur
-      const { data, error } = await supabase
-        .from('users')
-        .insert(updatedUserData)
-        .select();
-      
-      if (error) {
-        console.error("Erreur lors de l'insertion des données utilisateur:", error);
-        throw error;
-      }
-      
-      result = data;
+      // Ajout d'un nouvel utilisateur
+      allUsers.push(updatedUserData);
     }
     
-    console.log("Données utilisateur sauvegardées avec succès:", result);
+    // Sauvegarder toutes les données
+    localStorage.setItem('allUsersData', JSON.stringify(allUsers));
+    
+    // Simule un délai pour l'enregistrement
+    await new Promise(resolve => setTimeout(resolve, 1000));
     
     return updatedUserData;
   } catch (error) {
-    console.error("Erreur lors de la sauvegarde des données utilisateur:", error);
+    console.error("Error saving user data to JSON:", error);
     throw error;
   }
 };
 
-// Récupère toutes les données utilisateurs depuis Supabase
-export const getAllUsersData = async (): Promise<UserSession[]> => {
+// Récupère toutes les données utilisateurs (simulation d'une base de données)
+export const getAllUsersData = (): UserSession[] => {
   try {
-    const { data, error } = await supabase
-      .from('users')
-      .select('*');
-    
-    if (error) {
-      console.error("Erreur lors de la récupération des données utilisateurs:", error);
-      throw error;
-    }
-    
-    return data || [];
+    const allUsers = localStorage.getItem('allUsersData');
+    return allUsers ? JSON.parse(allUsers) : [];
   } catch (error) {
-    console.error("Erreur lors de la récupération de toutes les données utilisateurs:", error);
+    console.error("Error getting all users data:", error);
     return [];
   }
 };
 
 // Supprime un utilisateur par son email
-export const deleteUserByEmail = async (email: string): Promise<void> => {
+export const deleteUserByEmail = (email: string): void => {
   try {
-    const { error } = await supabase
-      .from('users')
-      .delete()
-      .eq('email', email);
-    
-    if (error) {
-      console.error("Erreur lors de la suppression de l'utilisateur:", error);
-      throw error;
-    }
-    
-    console.log("Utilisateur supprimé avec succès:", email);
+    const allUsers = getAllUsersData();
+    const filteredUsers = allUsers.filter(user => user.email !== email);
+    localStorage.setItem('allUsersData', JSON.stringify(filteredUsers));
   } catch (error) {
-    console.error("Erreur lors de la suppression de l'utilisateur:", error);
-    throw error;
+    console.error("Error deleting user:", error);
   }
 };
 

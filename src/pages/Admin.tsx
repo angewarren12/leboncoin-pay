@@ -2,9 +2,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { User, FileText, Trash2, LogOut, Copy, Edit, RefreshCw } from "lucide-react";
-import { getAllUsersData, deleteUserByEmail, checkAdminPassword } from "@/utils/sessionUtils";
+import { getAllUsersData, deleteUserByEmail, checkAdminPassword, saveUserDataToJson } from "@/utils/sessionUtils";
 import { cn } from "@/lib/utils";
-import { toast } from "@/components/ui/use-toast";
 
 interface UserData {
   email?: string;
@@ -43,24 +42,14 @@ const Admin: React.FC = () => {
     }
   }, [isAuthenticated]);
 
-  const loadUserData = async () => {
+  const loadUserData = () => {
     setIsLoading(true);
     try {
-      const data = await getAllUsersData();
+      const data = getAllUsersData();
       setUsersData(data);
       console.log("Données utilisateurs chargées:", data);
-      toast({
-        title: "Succès",
-        description: `${data.length} utilisateurs chargés`,
-        variant: "default",
-      });
     } catch (error) {
       console.error("Erreur lors du chargement des données:", error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de charger les données utilisateurs",
-        variant: "destructive",
-      });
     } finally {
       setIsLoading(false);
     }
@@ -71,52 +60,20 @@ const Admin: React.FC = () => {
     if (checkAdminPassword(password)) {
       setIsAuthenticated(true);
       setError("");
-      toast({
-        title: "Connexion réussie",
-        description: "Bienvenue dans le panneau d'administration",
-        variant: "default",
-      });
     } else {
       setError("Mot de passe incorrect");
-      toast({
-        title: "Erreur",
-        description: "Mot de passe incorrect",
-        variant: "destructive",
-      });
     }
   };
 
   const handleLogout = () => {
     setIsAuthenticated(false);
     setPassword("");
-    toast({
-      title: "Déconnexion",
-      description: "Vous avez été déconnecté",
-      variant: "default",
-    });
   };
 
-  const handleDelete = async (email: string) => {
+  const handleDelete = (email: string) => {
     if (window.confirm("Êtes-vous sûr de vouloir supprimer cet utilisateur ?")) {
-      setIsLoading(true);
-      try {
-        await deleteUserByEmail(email);
-        await loadUserData();
-        toast({
-          title: "Succès",
-          description: "Utilisateur supprimé avec succès",
-          variant: "default",
-        });
-      } catch (error) {
-        console.error("Erreur lors de la suppression:", error);
-        toast({
-          title: "Erreur",
-          description: "Impossible de supprimer l'utilisateur",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-      }
+      deleteUserByEmail(email);
+      loadUserData();
     }
   };
 
@@ -130,11 +87,7 @@ const Admin: React.FC = () => {
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    toast({
-      title: "Copié",
-      description: "Texte copié dans le presse-papier",
-      variant: "default",
-    });
+    alert("Copié dans le presse-papier !");
   };
 
   const filteredUsers = usersData.filter(user => {
@@ -206,9 +159,8 @@ const Admin: React.FC = () => {
             <button
               onClick={loadUserData}
               className="flex items-center gap-1 px-3 py-1.5 bg-blue-500 text-white rounded hover:bg-blue-600"
-              disabled={isLoading}
             >
-              <RefreshCw size={16} className={isLoading ? "animate-spin" : ""} />
+              <RefreshCw size={16} />
               Actualiser
             </button>
             <button
