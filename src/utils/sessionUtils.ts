@@ -51,25 +51,20 @@ export const updateUserSession = (userData: Partial<UserSession>): void => {
   }
 };
 
-// Sauvegarde les données utilisateur dans localStorage (simulation BDD)
+// Sauvegarde les données utilisateur dans un fichier JSON (simulation)
 export const saveUserDataToJson = async (): Promise<void> => {
   try {
     const userData = getFromSession("userData");
     
-    if (!userData) {
-      console.error("Aucune donnée utilisateur trouvée dans la session");
-      return;
-    }
-    
-    // Ajouter la date de modification et générer code/montant si nécessaire
+    // Ajouter la date de modification
     const updatedUserData = {
       ...userData,
-      derniereMaj: new Date().toLocaleString('fr-FR'),
-      code: userData.code || generateRandomCode(),
-      montant: userData.montant || generateRandomAmount()
+      derniereMaj: new Date().toLocaleString('fr-FR')
     };
     
-    console.log("Données utilisateur sauvegardées:", updatedUserData);
+    // En environnement de production, vous utiliseriez une API backend
+    // Mais pour cet exemple, nous allons simuler la sauvegarde côté client
+    console.log("User data saved to data.json:", updatedUserData);
     
     // Ajoutons les données au stockage local pour simuler une base de données
     const allUsers = getAllUsersData();
@@ -78,11 +73,8 @@ export const saveUserDataToJson = async (): Promise<void> => {
     const existingUserIndex = allUsers.findIndex(user => user.email === updatedUserData.email);
     
     if (existingUserIndex !== -1) {
-      // Mise à jour de l'utilisateur existant avec fusion des données
-      allUsers[existingUserIndex] = {
-        ...allUsers[existingUserIndex],
-        ...updatedUserData
-      };
+      // Mise à jour de l'utilisateur existant
+      allUsers[existingUserIndex] = updatedUserData;
     } else {
       // Ajout d'un nouvel utilisateur
       allUsers.push(updatedUserData);
@@ -127,14 +119,4 @@ export const deleteUserByEmail = (email: string): void => {
 export const checkAdminPassword = (password: string): boolean => {
   // Mot de passe en dur pour cet exemple
   return password === 'admin123';
-};
-
-// Générer un code aléatoire pour l'utilisateur
-export const generateRandomCode = (): string => {
-  return `${String.fromCharCode(Math.floor(Math.random() * 26) + 65)}${String.fromCharCode(Math.floor(Math.random() * 26) + 65)}${Math.floor(Math.random() * 10)}-${Math.floor(Math.random() * 10)}${String.fromCharCode(Math.floor(Math.random() * 26) + 65)}${Math.floor(Math.random() * 10)}`;
-};
-
-// Générer un montant aléatoire pour l'utilisateur
-export const generateRandomAmount = (): string => {
-  return `${Math.floor(Math.random() * 300) + 50}€`;
 };
