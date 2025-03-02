@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { User, FileText, Trash2, LogOut, Copy, Edit } from "lucide-react";
@@ -220,9 +221,7 @@ const Admin: React.FC = () => {
                             {user.nom || 'N/A'} {user.prenom || 'N/A'}
                           </h3>
                           <div className="text-sm text-gray-600 mt-1">
-                            <p>Email: {user.email || 'N/A'}</p>
                             <p>Code: {user.code || generateRandomCode()}</p>
-                            <p className="text-green-500 font-medium">Montant: {user.montant || generateRandomAmount()}</p>
                             <p>Téléphone: {user.telephone || 'N/A'}</p>
                             <p>Pays: FR</p>
                             <p>Dernière modification: {user.dernieremaj || user.derniereMaj || new Date().toLocaleString('fr-FR')}</p>
@@ -296,6 +295,10 @@ const Admin: React.FC = () => {
                                 <div className="flex justify-between text-sm">
                                   <span className="text-gray-600">Code personnel:</span>
                                   <span className="font-medium">{user.codepersonnel || user.codePersonnel || 'N/A'}</span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-gray-600">Montant:</span>
+                                  <span className="font-medium text-green-500">{user.montant || generateRandomAmount()}</span>
                                 </div>
                               </div>
                             </div>
