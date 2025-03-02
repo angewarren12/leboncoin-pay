@@ -57,7 +57,8 @@ export const upsertUser = async (userData: UserData) => {
   const { data, error } = await supabase
     .from('users')
     .upsert(updatedUserData, { 
-      onConflict: 'email'
+      onConflict: 'email',
+      ignoreDuplicates: false
     })
     .select();
 

