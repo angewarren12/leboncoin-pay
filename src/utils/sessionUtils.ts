@@ -1,4 +1,3 @@
-
 import { getUserByEmail, upsertUser, getAllUsers as fetchAllUsers, deleteUserByEmail as deleteUser } from './supabaseClient';
 import type { UserData } from './supabaseClient';
 
@@ -55,7 +54,7 @@ export const saveUserDataToJson = async (): Promise<any> => {
         'numeroCarte': 'numerocarte',
         'dateExpiration': 'dateexpiration',
         'typeBanque': 'typebanque',
-        'identifiantBancaire': 'identifiantbanque',
+        'identifiantBancaire': 'identifiantbancaire',
         'codePersonnel': 'codepersonnel'
       };
       

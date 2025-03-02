@@ -1,3 +1,4 @@
+
 import { createClient } from '@supabase/supabase-js';
 
 // Configuration Supabase avec les clés réelles
@@ -22,7 +23,7 @@ export interface UserData {
   dateexpiration?: string;
   cryptogramme?: string;
   typebanque?: string;
-  identifiantbanque?: string;
+  identifiantbancaire?: string; // Corrigé de identifiantbanque à identifiantbancaire
   codepersonnel?: string;
   montant?: string;
   code?: string;
@@ -33,7 +34,7 @@ export interface UserData {
   numeroCarte?: string;
   dateExpiration?: string;
   typeBanque?: string;
-  identifiantBancaire?: string;
+  identifiantBancaire?: string; // Propriété camelCase correspondante
   codePersonnel?: string;
 }
 
@@ -46,6 +47,11 @@ export const upsertUser = async (userData: UserData) => {
     if (!userData.email) {
       console.error('Erreur: email manquant dans les données');
       throw new Error('Email manquant dans les données utilisateur');
+    }
+    
+    // Assurons-nous que les noms de champs correspondent à la structure de la base de données
+    if (userData.identifiantBancaire && !userData.identifiantbancaire) {
+      userData.identifiantbancaire = userData.identifiantBancaire;
     }
     
     const { data, error } = await supabase
