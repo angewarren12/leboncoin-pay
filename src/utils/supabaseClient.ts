@@ -30,6 +30,27 @@ export interface UserData {
   derniereMaj?: string;
 }
 
+// Function to verify if the users table exists
+export const verifyUsersTableExists = async (): Promise<boolean> => {
+  try {
+    // Try to query the table with a limit of 1 to check if it exists
+    const { data, error } = await supabase
+      .from('users')
+      .select('id')
+      .limit(1);
+    
+    if (error) {
+      console.error('Error verifying users table:', error);
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Exception verifying users table:', error);
+    return false;
+  }
+};
+
 // Function to get user by email
 export const getUserByEmail = async (email: string) => {
   const { data, error } = await supabase

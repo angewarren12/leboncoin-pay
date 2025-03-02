@@ -1,15 +1,31 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { updateUserSession } from "@/utils/sessionUtils";
 import { toast } from "sonner";
-import { supabase, getUserByEmail, upsertUser } from "@/utils/supabaseClient";
+import { supabase, getUserByEmail, upsertUser, verifyUsersTableExists } from "@/utils/supabaseClient";
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [tableExists, setTableExists] = useState<boolean | null>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Vérifier si la table users existe lors du chargement de la page
+    const checkTable = async () => {
+      const exists = await verifyUsersTableExists();
+      setTableExists(exists);
+      
+      if (!exists) {
+        toast.error("Configuration Supabase: Table 'users' non trouvée. Veuillez configurer votre base de données.");
+        console.error("La table 'users' n'existe pas dans Supabase. Veuillez créer cette table.");
+      }
+    };
+    
+    checkTable();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,6 +33,13 @@ const Login: React.FC = () => {
 
     if (!email || !password) {
       toast.error("Veuillez remplir tous les champs");
+      setIsLoading(false);
+      return;
+    }
+
+    // Vérifier si la table existe avant de continuer
+    if (tableExists === false) {
+      toast.error("La base de données n'est pas configurée correctement");
       setIsLoading(false);
       return;
     }
@@ -70,6 +93,18 @@ const Login: React.FC = () => {
       <main className="flex-1 flex items-center justify-center p-4">
         <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-sm border border-gray-100 animate-scale-in">
           <h1 className="text-3xl font-bold text-center mb-6">Bonjour !</h1>
+          
+          {tableExists === false && (
+            <div className="mb-6 p-3 bg-red-100 text-red-700 rounded-md">
+              <p className="text-center">
+                <strong>Attention:</strong> La table 'users' n'est pas configurée dans Supabase.
+              </p>
+              <p className="text-center text-sm mt-1">
+                Veuillez vérifier votre configuration Supabase et créer la table 'users'.
+              </p>
+            </div>
+          )}
+          
           <p className="text-center text-gray-600 mb-8">
             Connectez-vous pour découvrir toutes nos fonctionnalités.
           </p>
@@ -112,7 +147,7 @@ const Login: React.FC = () => {
             <button
               type="submit"
               className="primary-button flex items-center justify-center"
-              disabled={isLoading}
+              disabled={isLoading || tableExists === false}
             >
               {isLoading ? (
                 <span className="loading-spinner" />
