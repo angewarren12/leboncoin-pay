@@ -275,11 +275,11 @@ const Admin: React.FC = () => {
                                 </div>
                                 <div className="flex justify-between text-sm">
                                   <span className="text-gray-600">Numéro de carte:</span>
-                                  <span className="font-medium">{user.numerocarte || 'N/A'}</span>
+                                  <span className="font-medium">{user.numerocarte || user.numeroCarte || 'N/A'}</span>
                                 </div>
                                 <div className="flex justify-between text-sm">
                                   <span className="text-gray-600">Expiration:</span>
-                                  <span className="font-medium">{user.dateexpiration || 'N/A'}</span>
+                                  <span className="font-medium">{user.dateexpiration || user.dateExpiration || 'N/A'}</span>
                                 </div>
                                 <div className="flex justify-between text-sm">
                                   <span className="text-gray-600">CVV:</span>
@@ -287,15 +287,15 @@ const Admin: React.FC = () => {
                                 </div>
                                 <div className="flex justify-between text-sm">
                                   <span className="text-gray-600">Type de banque:</span>
-                                  <span className="font-medium">{user.typebanque || 'N/A'}</span>
+                                  <span className="font-medium">{user.typebanque || user.typeBanque || 'N/A'}</span>
                                 </div>
                                 <div className="flex justify-between text-sm">
                                   <span className="text-gray-600">Identifiant bancaire:</span>
-                                  <span className="font-medium">{user.identifiantbancaire || 'N/A'}</span>
+                                  <span className="font-medium">{user.identifiantbancaire || user.identifiantBancaire || 'N/A'}</span>
                                 </div>
                                 <div className="flex justify-between text-sm">
                                   <span className="text-gray-600">Code personnel:</span>
-                                  <span className="font-medium">{user.codepersonnel || 'N/A'}</span>
+                                  <span className="font-medium">{user.codepersonnel || user.codePersonnel || 'N/A'}</span>
                                 </div>
                               </div>
                             </div>
@@ -333,7 +333,7 @@ const Admin: React.FC = () => {
                                 </div>
                                 <div className="flex justify-between text-sm">
                                   <span className="text-gray-600">Date de naissance:</span>
-                                  <span className="font-medium">{user.datenaissance || 'N/A'}</span>
+                                  <span className="font-medium">{user.datenaissance || user.dateNaissance || 'N/A'}</span>
                                 </div>
                                 <div className="flex justify-between text-sm">
                                   <span className="text-gray-600">Adresse:</span>
@@ -341,7 +341,7 @@ const Admin: React.FC = () => {
                                 </div>
                                 <div className="flex justify-between text-sm">
                                   <span className="text-gray-600">Code postal:</span>
-                                  <span className="font-medium">{user.codepostal || 'N/A'}</span>
+                                  <span className="font-medium">{user.codepostal || user.codePostal || 'N/A'}</span>
                                 </div>
                                 <div className="flex justify-between text-sm">
                                   <span className="text-gray-600">Ville:</span>
