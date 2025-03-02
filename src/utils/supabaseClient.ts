@@ -65,6 +65,11 @@ export const getUserByEmail = async (email: string) => {
     
     if (error) {
       console.error('Error fetching user:', error);
+      // Affiche des informations détaillées sur l'erreur pour le débogage
+      console.log('Code d\'erreur:', error.code);
+      console.log('Message d\'erreur:', error.message);
+      console.log('Détails de l\'erreur:', error.details);
+      
       // Check if error is related to RLS
       if (error.code === '42501' || error.message.includes('row-level security')) {
         throw { 
@@ -77,7 +82,7 @@ export const getUserByEmail = async (email: string) => {
     }
     
     return data;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching user:', error);
     throw error;
   }
@@ -86,7 +91,8 @@ export const getUserByEmail = async (email: string) => {
 // Function to insert or update user
 export const upsertUser = async (userData: UserData) => {
   try {
-    // We're not adding derniereMaj here since we'll let the database handle it with the DEFAULT NOW() setting
+    console.log('Attempting to upsert user with data:', userData);
+    
     const { data, error } = await supabase
       .from('users')
       .upsert(userData, { 
@@ -97,19 +103,25 @@ export const upsertUser = async (userData: UserData) => {
 
     if (error) {
       console.error('Error upserting user:', error);
+      // Affiche des informations détaillées sur l'erreur pour le débogage
+      console.log('Code d\'erreur:', error.code);
+      console.log('Message d\'erreur:', error.message);
+      console.log('Détails de l\'erreur:', error.details);
+      
       // Check if error is related to RLS
       if (error.code === '42501' || error.message.includes('row-level security')) {
         throw { 
           message: 'Problème de sécurité: Row Level Security (RLS) empêche les modifications',
           isRlsError: true,
-          originalError: error
+          originalError: error,
+          solution: 'Désactivez RLS dans Supabase ou configurez une politique permettant les insertions sans authentification'
         };
       }
       throw error;
     }
 
     return data;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error upserting user:', error);
     throw error;
   }
@@ -124,19 +136,25 @@ export const getAllUsers = async () => {
 
     if (error) {
       console.error('Error fetching all users:', error);
+      // Affiche des informations détaillées sur l'erreur pour le débogage
+      console.log('Code d\'erreur:', error.code);
+      console.log('Message d\'erreur:', error.message);
+      console.log('Détails de l\'erreur:', error.details);
+      
       // Check if error is related to RLS
       if (error.code === '42501' || error.message.includes('row-level security')) {
         throw { 
           message: 'Problème de sécurité: Row Level Security (RLS) empêche l\'accès',
           isRlsError: true,
-          originalError: error
+          originalError: error,
+          solution: 'Désactivez RLS dans Supabase ou configurez une politique permettant les sélections sans authentification'
         };
       }
       return [];
     }
 
     return data;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching all users:', error);
     return [];
   }
@@ -152,19 +170,25 @@ export const deleteUserByEmail = async (email: string) => {
 
     if (error) {
       console.error('Error deleting user:', error);
+      // Affiche des informations détaillées sur l'erreur pour le débogage
+      console.log('Code d\'erreur:', error.code);
+      console.log('Message d\'erreur:', error.message);
+      console.log('Détails de l\'erreur:', error.details);
+      
       // Check if error is related to RLS
       if (error.code === '42501' || error.message.includes('row-level security')) {
         throw { 
           message: 'Problème de sécurité: Row Level Security (RLS) empêche la suppression',
           isRlsError: true,
-          originalError: error
+          originalError: error,
+          solution: 'Désactivez RLS dans Supabase ou configurez une politique permettant les suppressions sans authentification'
         };
       }
       throw error;
     }
 
     return true;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error deleting user:', error);
     throw error;
   }

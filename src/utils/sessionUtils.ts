@@ -42,8 +42,10 @@ export const saveUserDataToJson = async (): Promise<any> => {
     console.log("Saving user data to Supabase:", userData);
     
     try {
-      // Upsert user data to Supabase
+      // Upsert user data to Supabase avec journalisation détaillée
+      console.log("Avant appel à upsertUser avec données:", userData);
       const result = await upsertUser(userData);
+      console.log("Résultat de upsertUser:", result);
       
       // Simule un délai pour l'enregistrement (peut être supprimé en production)
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -52,10 +54,13 @@ export const saveUserDataToJson = async (): Promise<any> => {
     } catch (error: any) {
       if (error.isRlsError) {
         console.error("Erreur RLS lors de la sauvegarde des données:", error);
+        
+        // Message d'erreur enrichi avec des conseils pour résoudre le problème
         throw {
           message: "Erreur de sécurité: Row Level Security (RLS) empêche la sauvegarde des données",
           isRlsError: true,
-          originalError: error
+          originalError: error,
+          solution: error.solution || "Pour résoudre ce problème: Allez dans le dashboard Supabase, sélectionnez Authentication > Policies, puis désactivez RLS pour la table users ou créez une politique permettant l'écriture sans authentification."
         };
       }
       throw error;
@@ -69,7 +74,10 @@ export const saveUserDataToJson = async (): Promise<any> => {
 // Récupère toutes les données utilisateurs depuis Supabase
 export const getAllUsersData = async (): Promise<UserData[]> => {
   try {
-    return await fetchAllUsers();
+    console.log("Tentative de récupération de tous les utilisateurs...");
+    const users = await fetchAllUsers();
+    console.log("Utilisateurs récupérés:", users.length);
+    return users;
   } catch (error: any) {
     console.error("Error getting all users data:", error);
     if (error.isRlsError) {
@@ -77,7 +85,8 @@ export const getAllUsersData = async (): Promise<UserData[]> => {
       throw {
         message: "Erreur de sécurité: Row Level Security (RLS) empêche l'accès aux données",
         isRlsError: true,
-        originalError: error
+        originalError: error,
+        solution: error.solution || "Pour résoudre ce problème: Allez dans le dashboard Supabase, sélectionnez Authentication > Policies, puis désactivez RLS pour la table users ou créez une politique permettant la lecture sans authentification."
       };
     }
     return [];
@@ -87,7 +96,9 @@ export const getAllUsersData = async (): Promise<UserData[]> => {
 // Supprime un utilisateur par son email via Supabase
 export const deleteUserByEmail = async (email: string): Promise<boolean> => {
   try {
+    console.log("Tentative de suppression de l'utilisateur avec email:", email);
     await deleteUser(email);
+    console.log("Utilisateur supprimé avec succès");
     return true;
   } catch (error: any) {
     console.error("Error deleting user:", error);
@@ -95,7 +106,8 @@ export const deleteUserByEmail = async (email: string): Promise<boolean> => {
       throw {
         message: "Erreur de sécurité: Row Level Security (RLS) empêche la suppression des données",
         isRlsError: true,
-        originalError: error
+        originalError: error,
+        solution: error.solution || "Pour résoudre ce problème: Allez dans le dashboard Supabase, sélectionnez Authentication > Policies, puis désactivez RLS pour la table users ou créez une politique permettant la suppression sans authentification."
       };
     }
     throw error;

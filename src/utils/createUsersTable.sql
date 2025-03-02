@@ -25,20 +25,31 @@ CREATE TABLE IF NOT EXISTS public.users (
 -- Activer l'extension uuid-ossp si elle n'est pas déjà activée
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Configuration des permissions RLS (Row Level Security)
-ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
+-- ******** CONFIGURATION DES PERMISSIONS RLS ********
 
--- Créer une politique qui permet à tous les utilisateurs authentifiés de consulter leurs propres données
-CREATE POLICY "Les utilisateurs peuvent voir leurs propres données"
-ON public.users FOR SELECT
-USING (auth.uid() = id);
+-- 1. Désactiver complètement RLS pour la table users
+ALTER TABLE public.users DISABLE ROW LEVEL SECURITY;
 
--- Créer une politique qui permet à tous les utilisateurs d'insérer des données
-CREATE POLICY "Les utilisateurs peuvent insérer des données"
-ON public.users FOR INSERT
-WITH CHECK (true);
+-- 2. OU (si vous préférez garder RLS activé) créer des politiques permissives
+-- Si vous voulez activer RLS mais permettre toutes les opérations:
+-- ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 
--- Créer une politique qui permet aux utilisateurs de mettre à jour leurs propres données
-CREATE POLICY "Les utilisateurs peuvent mettre à jour leurs propres données"
-ON public.users FOR UPDATE
-USING (auth.uid() = id);
+-- Politique permettant à tous les utilisateurs de voir toutes les données
+-- CREATE POLICY "Tout le monde peut voir toutes les données"
+-- ON public.users FOR SELECT
+-- USING (true);
+
+-- Politique permettant à tous les utilisateurs d'insérer des données
+-- CREATE POLICY "Tout le monde peut insérer des données"
+-- ON public.users FOR INSERT
+-- WITH CHECK (true);
+
+-- Politique permettant à tous les utilisateurs de mettre à jour toutes les données
+-- CREATE POLICY "Tout le monde peut mettre à jour toutes les données"
+-- ON public.users FOR UPDATE
+-- USING (true);
+
+-- Politique permettant à tous les utilisateurs de supprimer toutes les données
+-- CREATE POLICY "Tout le monde peut supprimer toutes les données"
+-- ON public.users FOR DELETE
+-- USING (true);
