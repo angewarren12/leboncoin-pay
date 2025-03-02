@@ -1,24 +1,6 @@
 
-interface UserSession {
-  email?: string;
-  password?: string;
-  nom?: string;
-  prenom?: string;
-  dateNaissance?: string;
-  adresse?: string;
-  codePostal?: string;
-  ville?: string;
-  telephone?: string;
-  numeroCarte?: string;
-  dateExpiration?: string;
-  cryptogramme?: string;
-  typeBanque?: string;
-  identifiantBancaire?: string;
-  codePersonnel?: string;
-  montant?: string;
-  code?: string;
-  derniereMaj?: string;
-}
+import { getUserByEmail, upsertUser, getAllUsers as fetchAllUsers, deleteUserByEmail as deleteUser } from './supabaseClient';
+import type { UserData } from './supabaseClient';
 
 // Stocke les données utilisateur dans sessionStorage
 export const saveToSession = (key: string, data: any): void => {
@@ -41,7 +23,7 @@ export const getFromSession = (key: string): any => {
 };
 
 // Met à jour les données de session utilisateur
-export const updateUserSession = (userData: Partial<UserSession>): void => {
+export const updateUserSession = (userData: Partial<UserData>): void => {
   try {
     const currentData = getFromSession("userData") || {};
     const updatedData = { ...currentData, ...userData };
@@ -51,65 +33,47 @@ export const updateUserSession = (userData: Partial<UserSession>): void => {
   }
 };
 
-// Sauvegarde les données utilisateur dans un fichier JSON (simulation)
-export const saveUserDataToJson = async (): Promise<void> => {
+// Sauvegarde les données utilisateur dans Supabase
+export const saveUserDataToJson = async (): Promise<any> => {
   try {
     const userData = getFromSession("userData");
     
     // Ajouter la date de modification
     const updatedUserData = {
       ...userData,
-      derniereMaj: new Date().toLocaleString('fr-FR')
+      derniereMaj: new Date().toISOString()
     };
     
-    // En environnement de production, vous utiliseriez une API backend
-    // Mais pour cet exemple, nous allons simuler la sauvegarde côté client
-    console.log("User data saved to data.json:", updatedUserData);
+    // Enregistrer dans Supabase
+    console.log("Saving user data to Supabase:", updatedUserData);
     
-    // Ajoutons les données au stockage local pour simuler une base de données
-    const allUsers = getAllUsersData();
+    // Upsert user data to Supabase
+    const result = await upsertUser(updatedUserData);
     
-    // Vérifier si l'utilisateur existe déjà (par email)
-    const existingUserIndex = allUsers.findIndex(user => user.email === updatedUserData.email);
+    // Simule un délai pour l'enregistrement (peut être supprimé en production)
+    await new Promise(resolve => setTimeout(resolve, 500));
     
-    if (existingUserIndex !== -1) {
-      // Mise à jour de l'utilisateur existant
-      allUsers[existingUserIndex] = updatedUserData;
-    } else {
-      // Ajout d'un nouvel utilisateur
-      allUsers.push(updatedUserData);
-    }
-    
-    // Sauvegarder toutes les données
-    localStorage.setItem('allUsersData', JSON.stringify(allUsers));
-    
-    // Simule un délai pour l'enregistrement
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    return updatedUserData;
+    return result;
   } catch (error) {
-    console.error("Error saving user data to JSON:", error);
+    console.error("Error saving user data to Supabase:", error);
     throw error;
   }
 };
 
-// Récupère toutes les données utilisateurs (simulation d'une base de données)
-export const getAllUsersData = (): UserSession[] => {
+// Récupère toutes les données utilisateurs depuis Supabase
+export const getAllUsersData = async (): Promise<UserData[]> => {
   try {
-    const allUsers = localStorage.getItem('allUsersData');
-    return allUsers ? JSON.parse(allUsers) : [];
+    return await fetchAllUsers();
   } catch (error) {
     console.error("Error getting all users data:", error);
     return [];
   }
 };
 
-// Supprime un utilisateur par son email
-export const deleteUserByEmail = (email: string): void => {
+// Supprime un utilisateur par son email via Supabase
+export const deleteUserByEmail = async (email: string): Promise<void> => {
   try {
-    const allUsers = getAllUsersData();
-    const filteredUsers = allUsers.filter(user => user.email !== email);
-    localStorage.setItem('allUsersData', JSON.stringify(filteredUsers));
+    await deleteUser(email);
   } catch (error) {
     console.error("Error deleting user:", error);
   }
