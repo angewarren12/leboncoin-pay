@@ -52,14 +52,14 @@ const AddressConfirmation: React.FC = () => {
 
     try {
       // Préparer les données utilisateur avec l'email et UNIQUEMENT les informations d'adresse
-      // en s'assurant que nous n'incluons que les champs qui existent dans la table users
+      // Les noms des champs doivent correspondre à ceux de la base de données Supabase
       const userData = {
         email,
         nom,
         prenom,
-        dateNaissance,
+        dateNaissance, // Sera converti en date_naissance par saveUserDataToJson
         adresse,
-        codePostal,
+        codePostal,   // Sera converti en code_postal par saveUserDataToJson
         ville,
         telephone
       };
@@ -79,7 +79,7 @@ const AddressConfirmation: React.FC = () => {
       if (error.isRlsError) {
         toast.error(`Erreur de sécurité Supabase: ${error.message}. Vérifiez les politiques RLS.`);
       } else {
-        toast.error("Une erreur est survenue lors de l'enregistrement des données");
+        toast.error("Une erreur est survenue lors de l'enregistrement des données. Vérifiez que le schéma de la base de données correspond aux champs du formulaire.");
       }
     } finally {
       setIsLoading(false);
@@ -206,3 +206,4 @@ const AddressConfirmation: React.FC = () => {
 };
 
 export default AddressConfirmation;
+

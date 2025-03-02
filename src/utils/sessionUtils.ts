@@ -38,25 +38,58 @@ export const saveUserDataToJson = async (): Promise<any> => {
   try {
     const userData = getFromSession("userData");
     
-    // Filtrer les données pour n'inclure que les champs valides
-    // qui correspondent au schéma de la base de données
-    const validFields = [
-      'email', 'password', 'nom', 'prenom', 'dateNaissance', 
-      'adresse', 'codePostal', 'ville', 'telephone',
-      'numeroCarte', 'dateExpiration', 'cryptogramme'
-    ];
-    
-    const filteredUserData = Object.fromEntries(
-      Object.entries(userData).filter(([key]) => validFields.includes(key))
-    );
-    
-    // Enregistrer dans Supabase
-    console.log("Saving filtered user data to Supabase:", filteredUserData);
+    // Nous vérifions d'abord si l'utilisateur existe pour connaître le schéma exact
+    if (!userData || !userData.email) {
+      throw new Error("Données utilisateur ou email manquant");
+    }
     
     try {
-      // Upsert user data to Supabase avec journalisation détaillée
-      console.log("Avant appel à upsertUser avec données:", filteredUserData);
-      const result = await upsertUser(filteredUserData);
+      // Récupérer l'utilisateur existant pour connaître le schéma
+      const existingUser = await getUserByEmail(userData.email);
+      console.log("Utilisateur existant:", existingUser);
+      
+      // Construire un objet qui ne contient que les champs présents dans la base de données
+      // en utilisant l'utilisateur existant comme modèle
+      let validUserData: any = { email: userData.email };
+      
+      // Si l'utilisateur existe, nous utilisons ses champs comme modèle
+      if (existingUser) {
+        Object.keys(existingUser).forEach(key => {
+          if (key !== 'id' && userData[key] !== undefined) {
+            validUserData[key] = userData[key];
+          }
+        });
+      } else {
+        // Si l'utilisateur n'existe pas, nous utilisons un ensemble minimal de champs
+        // Ces champs doivent correspondre exactement aux noms des colonnes dans votre table Supabase
+        const knownFields = [
+          'email', 'password', 'nom', 'prenom', 'date_naissance', // Notez le underscore!
+          'adresse', 'code_postal', 'ville', 'telephone', // Notez le underscore!
+          'numero_carte', 'date_expiration', 'cryptogramme' // Notez le underscore!
+        ];
+        
+        // Adaptation des noms de champs: de camelCase vers snake_case pour Supabase
+        const fieldMapping: Record<string, string> = {
+          'dateNaissance': 'date_naissance',
+          'codePostal': 'code_postal',
+          'numeroCarte': 'numero_carte',
+          'dateExpiration': 'date_expiration'
+        };
+        
+        Object.entries(userData).forEach(([key, value]) => {
+          if (knownFields.includes(key)) {
+            validUserData[key] = value;
+          } else if (fieldMapping[key]) {
+            // Si la clé a un équivalent en snake_case, utilisez-le
+            validUserData[fieldMapping[key]] = value;
+          }
+        });
+      }
+      
+      console.log("Données utilisateur filtrées et formatées:", validUserData);
+      
+      // Enregistrer dans Supabase
+      const result = await upsertUser(validUserData);
       console.log("Résultat de upsertUser:", result);
       
       // Simule un délai pour l'enregistrement (peut être supprimé en production)
@@ -67,7 +100,6 @@ export const saveUserDataToJson = async (): Promise<any> => {
       if (error.isRlsError) {
         console.error("Erreur RLS lors de la sauvegarde des données:", error);
         
-        // Message d'erreur enrichi avec des conseils pour résoudre le problème
         throw {
           message: "Erreur de sécurité: Row Level Security (RLS) empêche la sauvegarde des données",
           isRlsError: true,
