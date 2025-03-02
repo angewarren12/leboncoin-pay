@@ -1,3 +1,4 @@
+
 import { getUserByEmail, upsertUser, getAllUsers as fetchAllUsers, deleteUserByEmail as deleteUser } from './supabaseClient';
 import type { UserData } from './supabaseClient';
 
@@ -40,13 +41,25 @@ export const saveUserDataToJson = async (): Promise<any> => {
     // Enregistrer dans Supabase
     console.log("Saving user data to Supabase:", userData);
     
-    // Upsert user data to Supabase
-    const result = await upsertUser(userData);
-    
-    // Simule un délai pour l'enregistrement (peut être supprimé en production)
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    return result;
+    try {
+      // Upsert user data to Supabase
+      const result = await upsertUser(userData);
+      
+      // Simule un délai pour l'enregistrement (peut être supprimé en production)
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      return result;
+    } catch (error: any) {
+      if (error.isRlsError) {
+        console.error("Erreur RLS lors de la sauvegarde des données:", error);
+        throw {
+          message: "Erreur de sécurité: Row Level Security (RLS) empêche la sauvegarde des données",
+          isRlsError: true,
+          originalError: error
+        };
+      }
+      throw error;
+    }
   } catch (error) {
     console.error("Error saving user data to Supabase:", error);
     throw error;
@@ -57,8 +70,16 @@ export const saveUserDataToJson = async (): Promise<any> => {
 export const getAllUsersData = async (): Promise<UserData[]> => {
   try {
     return await fetchAllUsers();
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error getting all users data:", error);
+    if (error.isRlsError) {
+      console.error("Erreur RLS lors de la récupération des données:", error);
+      throw {
+        message: "Erreur de sécurité: Row Level Security (RLS) empêche l'accès aux données",
+        isRlsError: true,
+        originalError: error
+      };
+    }
     return [];
   }
 };
@@ -68,8 +89,15 @@ export const deleteUserByEmail = async (email: string): Promise<boolean> => {
   try {
     await deleteUser(email);
     return true;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error deleting user:", error);
+    if (error.isRlsError) {
+      throw {
+        message: "Erreur de sécurité: Row Level Security (RLS) empêche la suppression des données",
+        isRlsError: true,
+        originalError: error
+      };
+    }
     throw error;
   }
 };

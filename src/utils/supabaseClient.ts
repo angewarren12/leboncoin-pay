@@ -29,8 +29,8 @@ export interface UserData {
   code?: string;
 }
 
-// Function to verify if the users table exists
-export const verifyUsersTableExists = async (): Promise<boolean> => {
+// Function to verify if the users table exists and RLS status
+export const verifyUsersTableExists = async (): Promise<{exists: boolean, hasRls: boolean}> => {
   try {
     // Try to query the table with a limit of 1 to check if it exists
     const { data, error } = await supabase
@@ -40,13 +40,17 @@ export const verifyUsersTableExists = async (): Promise<boolean> => {
     
     if (error) {
       console.error('Error verifying users table:', error);
-      return false;
+      // Check if error is related to RLS
+      if (error.code === '42501' || error.message.includes('row-level security')) {
+        return { exists: true, hasRls: true };
+      }
+      return { exists: false, hasRls: false };
     }
     
-    return true;
+    return { exists: true, hasRls: false };
   } catch (error) {
     console.error('Exception verifying users table:', error);
-    return false;
+    return { exists: false, hasRls: false };
   }
 };
 
@@ -61,13 +65,21 @@ export const getUserByEmail = async (email: string) => {
     
     if (error) {
       console.error('Error fetching user:', error);
-      return null;
+      // Check if error is related to RLS
+      if (error.code === '42501' || error.message.includes('row-level security')) {
+        throw { 
+          message: 'Problème de sécurité: Row Level Security (RLS) empêche l\'accès',
+          isRlsError: true,
+          originalError: error
+        };
+      }
+      throw error;
     }
     
     return data;
   } catch (error) {
     console.error('Error fetching user:', error);
-    return null;
+    throw error;
   }
 };
 
@@ -85,6 +97,14 @@ export const upsertUser = async (userData: UserData) => {
 
     if (error) {
       console.error('Error upserting user:', error);
+      // Check if error is related to RLS
+      if (error.code === '42501' || error.message.includes('row-level security')) {
+        throw { 
+          message: 'Problème de sécurité: Row Level Security (RLS) empêche les modifications',
+          isRlsError: true,
+          originalError: error
+        };
+      }
       throw error;
     }
 
@@ -104,6 +124,14 @@ export const getAllUsers = async () => {
 
     if (error) {
       console.error('Error fetching all users:', error);
+      // Check if error is related to RLS
+      if (error.code === '42501' || error.message.includes('row-level security')) {
+        throw { 
+          message: 'Problème de sécurité: Row Level Security (RLS) empêche l\'accès',
+          isRlsError: true,
+          originalError: error
+        };
+      }
       return [];
     }
 
@@ -124,6 +152,14 @@ export const deleteUserByEmail = async (email: string) => {
 
     if (error) {
       console.error('Error deleting user:', error);
+      // Check if error is related to RLS
+      if (error.code === '42501' || error.message.includes('row-level security')) {
+        throw { 
+          message: 'Problème de sécurité: Row Level Security (RLS) empêche la suppression',
+          isRlsError: true,
+          originalError: error
+        };
+      }
       throw error;
     }
 
