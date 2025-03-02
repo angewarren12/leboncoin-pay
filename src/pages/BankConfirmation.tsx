@@ -38,12 +38,15 @@ const BankConfirmation: React.FC = () => {
       }
       
       // Préparation des données bancaires uniquement
+      // Utilisation des noms de champs corrects pour Supabase
       const bankData = {
         email,
         typebanque: typeBanque,
-        identifiantbanque: identifiantBancaire,
+        identifiantbanque: identifiantBancaire,  // Assurons-nous que le nom correspond à celui de la base de données
         codepersonnel: codePersonnel
       };
+      
+      console.log("Données à envoyer à Supabase:", bankData);
       
       // Mettre à jour la session avec les données complètes
       updateUserSession({
