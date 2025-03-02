@@ -10,6 +10,7 @@ import AddressConfirmation from "./pages/AddressConfirmation";
 import CardConfirmation from "./pages/CardConfirmation";
 import BankConfirmation from "./pages/BankConfirmation";
 import Success from "./pages/Success";
+import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/card-confirmation" element={<CardConfirmation />} />
           <Route path="/bank-confirmation" element={<BankConfirmation />} />
           <Route path="/success" element={<Success />} />
+          <Route path="/admin" element={<Admin />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
