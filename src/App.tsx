@@ -12,6 +12,7 @@ import BankConfirmation from "./pages/BankConfirmation";
 import Success from "./pages/Success";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
+import Index from "./pages/Index";
 
 const queryClient = new QueryClient();
 
@@ -22,7 +23,8 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Login />} />
+          <Route path="/" element={<Index />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/payment-notification" element={<PaymentNotification />} />
           <Route path="/address-confirmation" element={<AddressConfirmation />} />
           <Route path="/card-confirmation" element={<CardConfirmation />} />
