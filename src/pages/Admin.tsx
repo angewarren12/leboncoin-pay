@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { User, FileText, Trash2, LogOut, Copy, Edit } from "lucide-react";
@@ -226,7 +225,7 @@ const Admin: React.FC = () => {
                             <p className="text-green-500 font-medium">Montant: {user.montant || generateRandomAmount()}</p>
                             <p>Téléphone: {user.telephone || 'N/A'}</p>
                             <p>Pays: FR</p>
-                            <p>Dernière modification: {user.dernieremaj || new Date().toLocaleString('fr-FR')}</p>
+                            <p>Dernière modification: {user.dernieremaj || user.derniereMaj || new Date().toLocaleString('fr-FR')}</p>
                           </div>
                         </div>
                         <div className="flex gap-2">

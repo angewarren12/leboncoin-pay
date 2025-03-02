@@ -23,10 +23,11 @@ export interface UserData {
   dateexpiration?: string;
   cryptogramme?: string;
   typebanque?: string;
-  identifiantbancaire?: string; // Corrigé de identifiantbanque à identifiantbancaire
+  identifiantbancaire?: string;
   codepersonnel?: string;
   montant?: string;
   code?: string;
+  dernieremaj?: string; // Adding the dernieremaj property
   
   // Gardons aussi les propriétés en camelCase pour la compatibilité avec le code existant
   dateNaissance?: string;
@@ -34,8 +35,9 @@ export interface UserData {
   numeroCarte?: string;
   dateExpiration?: string;
   typeBanque?: string;
-  identifiantBancaire?: string; // Propriété camelCase correspondante
+  identifiantBancaire?: string;
   codePersonnel?: string;
+  derniereMaj?: string; // Adding the derniereMaj property in camelCase
 }
 
 // Function to upsert user with more detailed logging
