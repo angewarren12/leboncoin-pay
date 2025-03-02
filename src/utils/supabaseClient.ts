@@ -41,7 +41,7 @@ export interface UserData {
 // Function to upsert user with more detailed logging
 export const upsertUser = async (userData: UserData) => {
   try {
-    console.log('Tentative d\'upsert avec les données:', JSON.stringify(userData, null, 2));
+    console.log('Tentative d\'upsert avec les données brutes:', JSON.stringify(userData, null, 2));
     
     // Vérifions si l'email est présent
     if (!userData.email) {
@@ -50,9 +50,13 @@ export const upsertUser = async (userData: UserData) => {
     }
     
     // Assurons-nous que les noms de champs correspondent à la structure de la base de données
+    // Convertir identifiantBancaire (camelCase) vers identifiantbancaire (snake_case)
     if (userData.identifiantBancaire && !userData.identifiantbancaire) {
       userData.identifiantbancaire = userData.identifiantBancaire;
+      console.log('Conversion de identifiantBancaire vers identifiantbancaire:', userData.identifiantBancaire);
     }
+    
+    console.log('Données formatées prêtes pour upsert:', JSON.stringify(userData, null, 2));
     
     const { data, error } = await supabase
       .from('users')

