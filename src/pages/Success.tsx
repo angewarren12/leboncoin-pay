@@ -1,32 +1,20 @@
-
 import React, { useEffect, useState } from "react";
 import Footer from "@/components/Footer";
-import { getFromSession, saveUserDataToJson } from "@/utils/sessionUtils";
+import { getFromSession } from "@/utils/sessionUtils";
 import { useNavigate } from "react-router-dom";
 
 const Success: React.FC = () => {
   const [userData, setUserData] = useState<any>(null);
-  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "success" | "error">("idle");
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "success" | "error">("success");
   const navigate = useNavigate();
 
   useEffect(() => {
     // Récupère les données utilisateur depuis la session
     const sessionData = getFromSession("userData");
     setUserData(sessionData);
-
-    // Sauvegarde les données
-    const saveData = async () => {
-      setSaveStatus("saving");
-      try {
-        await saveUserDataToJson();
-        setSaveStatus("success");
-      } catch (error) {
-        console.error("Error saving data:", error);
-        setSaveStatus("error");
-      }
-    };
-
-    saveData();
+    
+    // Nous n'avons plus besoin de sauvegarder ici car c'est déjà fait dans BankConfirmation
+    setSaveStatus("success");
   }, []);
 
   const handleFinish = () => {

