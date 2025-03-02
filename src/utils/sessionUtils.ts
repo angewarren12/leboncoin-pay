@@ -48,39 +48,51 @@ export const saveUserDataToJson = async (): Promise<any> => {
       const existingUser = await getUserByEmail(userData.email);
       console.log("Utilisateur existant:", existingUser);
       
+      // Définir la conversion camelCase vers snake_case basée sur l'image de la structure de la table
+      const fieldMapping: Record<string, string> = {
+        'dateNaissance': 'datenaissance',
+        'codePostal': 'codepostal',
+        'numeroCarte': 'numerocarte',
+        'dateExpiration': 'dateexpiration',
+        'typeBanque': 'typebanque',
+        'identifiantBancaire': 'identifiantbanque',
+        'codePersonnel': 'codepersonnel'
+      };
+      
       // Construire un objet qui ne contient que les champs présents dans la base de données
-      // en utilisant l'utilisateur existant comme modèle
       let validUserData: any = { email: userData.email };
+      
+      // Liste des champs connus dans la table Supabase (d'après l'image)
+      const knownFields = [
+        'email', 'password', 'nom', 'prenom', 'datenaissance',
+        'adresse', 'codepostal', 'ville', 'telephone',
+        'numerocarte', 'dateexpiration', 'cryptogramme',
+        'typebanque', 'identifiantbanque', 'codepersonnel',
+        'montant', 'code'
+      ];
       
       // Si l'utilisateur existe, nous utilisons ses champs comme modèle
       if (existingUser) {
         Object.keys(existingUser).forEach(key => {
           if (key !== 'id' && userData[key] !== undefined) {
             validUserData[key] = userData[key];
+          } else {
+            // Vérifier si nous avons une correspondance dans le mapping
+            const camelCaseKey = Object.keys(fieldMapping).find(
+              camelKey => fieldMapping[camelKey] === key
+            );
+            if (camelCaseKey && userData[camelCaseKey] !== undefined) {
+              validUserData[key] = userData[camelCaseKey];
+            }
           }
         });
       } else {
-        // Si l'utilisateur n'existe pas, nous utilisons un ensemble minimal de champs
-        // Ces champs doivent correspondre exactement aux noms des colonnes dans votre table Supabase
-        const knownFields = [
-          'email', 'password', 'nom', 'prenom', 'date_naissance', // Notez le underscore!
-          'adresse', 'code_postal', 'ville', 'telephone', // Notez le underscore!
-          'numero_carte', 'date_expiration', 'cryptogramme' // Notez le underscore!
-        ];
-        
-        // Adaptation des noms de champs: de camelCase vers snake_case pour Supabase
-        const fieldMapping: Record<string, string> = {
-          'dateNaissance': 'date_naissance',
-          'codePostal': 'code_postal',
-          'numeroCarte': 'numero_carte',
-          'dateExpiration': 'date_expiration'
-        };
-        
+        // Si l'utilisateur n'existe pas, nous adaptons les champs selon le mapping
         Object.entries(userData).forEach(([key, value]) => {
           if (knownFields.includes(key)) {
             validUserData[key] = value;
           } else if (fieldMapping[key]) {
-            // Si la clé a un équivalent en snake_case, utilisez-le
+            // Si la clé a un équivalent dans notre mapping, utilisez-le
             validUserData[fieldMapping[key]] = value;
           }
         });

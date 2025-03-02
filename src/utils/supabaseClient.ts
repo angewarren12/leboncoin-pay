@@ -14,19 +14,28 @@ export interface UserData {
   password?: string;
   nom?: string;
   prenom?: string;
-  dateNaissance?: string;
+  datenaissance?: string; // Mise à jour du nom du champ
   adresse?: string;
-  codePostal?: string;
+  codepostal?: string; // Mise à jour du nom du champ
   ville?: string;
   telephone?: string;
+  numerocarte?: string; // Mise à jour du nom du champ
+  dateexpiration?: string; // Mise à jour du nom du champ
+  cryptogramme?: string;
+  typebanque?: string; // Mise à jour du nom du champ
+  identifiantbanque?: string; // Mise à jour du nom du champ
+  codepersonnel?: string; // Mise à jour du nom du champ
+  montant?: string;
+  code?: string;
+  
+  // Gardons aussi les propriétés en camelCase pour la compatibilité avec le code existant
+  dateNaissance?: string;
+  codePostal?: string;
   numeroCarte?: string;
   dateExpiration?: string;
-  cryptogramme?: string;
   typeBanque?: string;
   identifiantBancaire?: string;
   codePersonnel?: string;
-  montant?: string;
-  code?: string;
 }
 
 // Function to verify if the users table exists and RLS status
