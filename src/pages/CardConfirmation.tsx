@@ -33,6 +33,7 @@ const CardConfirmation: React.FC = () => {
       });
       
       setIsLoading(false);
+      // Navigation sans toast
       navigate("/bank-confirmation");
     }, 800);
   };
