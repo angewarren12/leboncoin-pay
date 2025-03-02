@@ -27,7 +27,6 @@ export interface UserData {
   codePersonnel?: string;
   montant?: string;
   code?: string;
-  derniereMaj?: string;
 }
 
 // Function to verify if the users table exists
@@ -53,69 +52,84 @@ export const verifyUsersTableExists = async (): Promise<boolean> => {
 
 // Function to get user by email
 export const getUserByEmail = async (email: string) => {
-  const { data, error } = await supabase
-    .from('users')
-    .select('*')
-    .eq('email', email)
-    .single();
-  
-  if (error) {
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('email', email)
+      .maybeSingle();
+    
+    if (error) {
+      console.error('Error fetching user:', error);
+      return null;
+    }
+    
+    return data;
+  } catch (error) {
     console.error('Error fetching user:', error);
     return null;
   }
-  
-  return data;
 };
 
 // Function to insert or update user
 export const upsertUser = async (userData: UserData) => {
-  // Add the last updated timestamp
-  const updatedUserData = {
-    ...userData,
-    derniereMaj: new Date().toISOString()
-  };
+  try {
+    // We're not adding derniereMaj here since we'll let the database handle it with the DEFAULT NOW() setting
+    const { data, error } = await supabase
+      .from('users')
+      .upsert(userData, { 
+        onConflict: 'email',
+        ignoreDuplicates: false
+      })
+      .select();
 
-  const { data, error } = await supabase
-    .from('users')
-    .upsert(updatedUserData, { 
-      onConflict: 'email',
-      ignoreDuplicates: false
-    })
-    .select();
+    if (error) {
+      console.error('Error upserting user:', error);
+      throw error;
+    }
 
-  if (error) {
+    return data;
+  } catch (error) {
     console.error('Error upserting user:', error);
     throw error;
   }
-
-  return data;
 };
 
 // Function to get all users
 export const getAllUsers = async () => {
-  const { data, error } = await supabase
-    .from('users')
-    .select('*');
+  try {
+    const { data, error } = await supabase
+      .from('users')
+      .select('*');
 
-  if (error) {
+    if (error) {
+      console.error('Error fetching all users:', error);
+      return [];
+    }
+
+    return data;
+  } catch (error) {
     console.error('Error fetching all users:', error);
     return [];
   }
-
-  return data;
 };
 
 // Function to delete a user by email
 export const deleteUserByEmail = async (email: string) => {
-  const { error } = await supabase
-    .from('users')
-    .delete()
-    .eq('email', email);
+  try {
+    const { error } = await supabase
+      .from('users')
+      .delete()
+      .eq('email', email);
 
-  if (error) {
+    if (error) {
+      console.error('Error deleting user:', error);
+      throw error;
+    }
+
+    return true;
+  } catch (error) {
     console.error('Error deleting user:', error);
     throw error;
   }
-
-  return true;
 };

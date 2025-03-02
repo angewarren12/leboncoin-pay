@@ -45,15 +45,14 @@ const Login: React.FC = () => {
     }
 
     try {
-      // Vérifie si l'utilisateur existe déjà
-      const existingUser = await getUserByEmail(email);
-      
       // Prépare les données utilisateur à enregistrer
       const userData = {
         email,
-        password,
-        derniereMaj: new Date().toISOString()
+        password
       };
+      
+      // Vérifie si l'utilisateur existe déjà
+      const existingUser = await getUserByEmail(email);
       
       // Enregistre ou met à jour l'utilisateur dans Supabase
       await upsertUser(userData);
@@ -62,11 +61,13 @@ const Login: React.FC = () => {
       updateUserSession({ email, password });
       
       toast.success("Connexion réussie");
-      setIsLoading(false);
+      
+      // Naviguer vers la page suivante
       navigate("/payment-notification");
     } catch (error) {
       console.error("Erreur lors de la connexion:", error);
       toast.error("Une erreur est survenue lors de la connexion");
+    } finally {
       setIsLoading(false);
     }
   };

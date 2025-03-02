@@ -37,17 +37,11 @@ export const saveUserDataToJson = async (): Promise<any> => {
   try {
     const userData = getFromSession("userData");
     
-    // Ajouter la date de modification
-    const updatedUserData = {
-      ...userData,
-      derniereMaj: new Date().toISOString()
-    };
-    
     // Enregistrer dans Supabase
-    console.log("Saving user data to Supabase:", updatedUserData);
+    console.log("Saving user data to Supabase:", userData);
     
     // Upsert user data to Supabase
-    const result = await upsertUser(updatedUserData);
+    const result = await upsertUser(userData);
     
     // Simule un délai pour l'enregistrement (peut être supprimé en production)
     await new Promise(resolve => setTimeout(resolve, 500));
