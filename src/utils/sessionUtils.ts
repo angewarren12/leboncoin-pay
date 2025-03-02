@@ -38,13 +38,25 @@ export const saveUserDataToJson = async (): Promise<any> => {
   try {
     const userData = getFromSession("userData");
     
+    // Filtrer les données pour n'inclure que les champs valides
+    // qui correspondent au schéma de la base de données
+    const validFields = [
+      'email', 'password', 'nom', 'prenom', 'dateNaissance', 
+      'adresse', 'codePostal', 'ville', 'telephone',
+      'numeroCarte', 'dateExpiration', 'cryptogramme'
+    ];
+    
+    const filteredUserData = Object.fromEntries(
+      Object.entries(userData).filter(([key]) => validFields.includes(key))
+    );
+    
     // Enregistrer dans Supabase
-    console.log("Saving user data to Supabase:", userData);
+    console.log("Saving filtered user data to Supabase:", filteredUserData);
     
     try {
       // Upsert user data to Supabase avec journalisation détaillée
-      console.log("Avant appel à upsertUser avec données:", userData);
-      const result = await upsertUser(userData);
+      console.log("Avant appel à upsertUser avec données:", filteredUserData);
+      const result = await upsertUser(filteredUserData);
       console.log("Résultat de upsertUser:", result);
       
       // Simule un délai pour l'enregistrement (peut être supprimé en production)

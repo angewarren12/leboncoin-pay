@@ -51,7 +51,8 @@ const AddressConfirmation: React.FC = () => {
     setIsLoading(true);
 
     try {
-      // Préparer les données utilisateur avec l'email et les informations d'adresse
+      // Préparer les données utilisateur avec l'email et UNIQUEMENT les informations d'adresse
+      // en s'assurant que nous n'incluons que les champs qui existent dans la table users
       const userData = {
         email,
         nom,
