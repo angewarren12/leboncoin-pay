@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { User, FileText, Trash2, LogOut, Copy, Edit } from "lucide-react";
@@ -41,9 +40,14 @@ const Admin: React.FC = () => {
     }
   }, [isAuthenticated]);
 
-  const loadUserData = () => {
-    const data = getAllUsersData();
-    setUsersData(data);
+  const loadUserData = async () => {
+    try {
+      const data = await getAllUsersData();
+      setUsersData(data);
+    } catch (error) {
+      console.error("Error loading user data:", error);
+      setUsersData([]);
+    }
   };
 
   const handleLogin = (e: React.FormEvent) => {
@@ -61,10 +65,14 @@ const Admin: React.FC = () => {
     setPassword("");
   };
 
-  const handleDelete = (email: string) => {
+  const handleDelete = async (email: string) => {
     if (window.confirm("Êtes-vous sûr de vouloir supprimer cet utilisateur ?")) {
-      deleteUserByEmail(email);
-      loadUserData();
+      try {
+        await deleteUserByEmail(email);
+        await loadUserData();
+      } catch (error) {
+        console.error("Error deleting user:", error);
+      }
     }
   };
 
@@ -95,12 +103,10 @@ const Admin: React.FC = () => {
     return searchFields.includes(searchTerm.toLowerCase());
   });
 
-  // Générer un code aléatoire pour l'utilisateur
   const generateRandomCode = () => {
     return `${Math.floor(Math.random() * 26 + 65).toString(36).toUpperCase()}${Math.floor(Math.random() * 26 + 65).toString(36).toUpperCase()}${Math.floor(Math.random() * 10)}-${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 26 + 65).toString(36).toUpperCase()}${Math.floor(Math.random() * 10)}`;
   };
 
-  // Générer un montant aléatoire pour l'utilisateur
   const generateRandomAmount = () => {
     return `${Math.floor(Math.random() * 300) + 50}€`;
   };

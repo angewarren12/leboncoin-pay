@@ -1,4 +1,3 @@
-
 import { getUserByEmail, upsertUser, getAllUsers as fetchAllUsers, deleteUserByEmail as deleteUser } from './supabaseClient';
 import type { UserData } from './supabaseClient';
 
@@ -71,11 +70,13 @@ export const getAllUsersData = async (): Promise<UserData[]> => {
 };
 
 // Supprime un utilisateur par son email via Supabase
-export const deleteUserByEmail = async (email: string): Promise<void> => {
+export const deleteUserByEmail = async (email: string): Promise<boolean> => {
   try {
     await deleteUser(email);
+    return true;
   } catch (error) {
     console.error("Error deleting user:", error);
+    throw error;
   }
 };
 
