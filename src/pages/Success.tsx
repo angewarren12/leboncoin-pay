@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import Footer from "@/components/Footer";
 import { getFromSession } from "@/utils/sessionUtils";
@@ -18,8 +19,11 @@ const Success: React.FC = () => {
   }, []);
 
   const handleFinish = () => {
-    // Réinitialise la session et redirige vers la page d'accueil
+    // Réinitialise complètement la session
     sessionStorage.clear();
+    console.log("Session storage cleared successfully");
+    
+    // Redirige vers la page d'accueil
     navigate("/");
   };
 
