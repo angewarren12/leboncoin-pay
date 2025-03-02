@@ -19,20 +19,14 @@ const AddressConfirmation: React.FC = () => {
   const navigate = useNavigate();
 
   // Récupérer l'email de l'utilisateur connecté à partir de la session au chargement
+  // mais sans précharger les champs du formulaire
   useEffect(() => {
     const userData = getFromSession("userData");
     if (userData && userData.email) {
       setEmail(userData.email);
       console.log("Email récupéré de la session:", userData.email);
       
-      // Pré-remplir les champs si disponibles
-      if (userData.nom) setNom(userData.nom);
-      if (userData.prenom) setPrenom(userData.prenom);
-      if (userData.dateNaissance) setDateNaissance(userData.dateNaissance);
-      if (userData.adresse) setAdresse(userData.adresse);
-      if (userData.codePostal) setCodePostal(userData.codePostal);
-      if (userData.ville) setVille(userData.ville);
-      if (userData.telephone) setTelephone(userData.telephone);
+      // Nous retirons le préchargement des champs ici
     } else {
       console.log("Aucun email trouvé dans la session");
       toast.error("Veuillez vous connecter d'abord");
@@ -115,11 +109,7 @@ const AddressConfirmation: React.FC = () => {
             Confirmez votre adresse
           </h1>
 
-          {email && (
-            <div className="mb-4 p-2 bg-gray-100 rounded">
-              <p className="text-gray-700">Utilisateur: <span className="font-medium">{email}</span></p>
-            </div>
-          )}
+          {/* Nous retirons l'affichage de l'email ici */}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
