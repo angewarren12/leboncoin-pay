@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js';
 
 // Configuration Supabase avec les clés réelles
@@ -27,7 +26,7 @@ export interface UserData {
   codepersonnel?: string;
   montant?: string;
   code?: string;
-  dernieremaj?: string; // Adding the dernieremaj property
+  dernieremaj?: string;
   
   // Gardons aussi les propriétés en camelCase pour la compatibilité avec le code existant
   dateNaissance?: string;
@@ -37,7 +36,7 @@ export interface UserData {
   typeBanque?: string;
   identifiantBancaire?: string;
   codePersonnel?: string;
-  derniereMaj?: string; // Adding the derniereMaj property in camelCase
+  derniereMaj?: string;
 }
 
 // Function to upsert user with more detailed logging
