@@ -1,11 +1,13 @@
 
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { User, FileText, Trash2, LogOut, Copy, Edit } from "lucide-react";
+import { User, FileText, Trash2, LogOut, Copy, Edit, FileDown } from "lucide-react";
 import { checkAdminPassword } from "@/utils/sessionUtils";
 import { cn } from "@/lib/utils";
 import { getAllUsers, deleteUserByEmail, UserData } from "@/utils/supabaseClient";
 import { toast } from "sonner";
+import { jsPDF } from "jspdf";
+import { format } from "date-fns";
 
 const Admin: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
@@ -100,6 +102,65 @@ const Admin: React.FC = () => {
     
     return searchFields.includes(searchTerm.toLowerCase());
   });
+
+  const generatePDF = (user: UserData) => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const currentDate = format(new Date(), "dd/MM/yyyy");
+    const montant = user.montant || generateRandomAmount();
+    
+    // Add logo
+    const logoX = 15;
+    const logoY = 15;
+    const logoWidth = 30;
+    doc.addImage("/logo.svg", "SVG", logoX, logoY, logoWidth, logoWidth / 5);
+    
+    // Add title
+    doc.setFontSize(16);
+    doc.setFont("helvetica", "bold");
+    doc.text("Détail opération", pageWidth - 60, 20);
+    
+    // Add horizontal line
+    doc.setLineWidth(0.5);
+    doc.line(15, 30, pageWidth - 15, 30);
+    
+    // Add content
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    
+    // Account section
+    doc.text("Compte :", 20, 60);
+    doc.setFont("helvetica", "bold");
+    doc.text(`${user.nom || 'N/A'} ${user.prenom || 'N/A'}`, 100, 60);
+    doc.setFont("helvetica", "normal");
+    doc.text("Leboncoin By Bancontact", 100, 70);
+    
+    // Amount section
+    doc.text("Montant :", 20, 90);
+    doc.setFont("helvetica", "normal");
+    doc.text("(Virement instantané en euros)", 100, 90);
+    doc.setFont("helvetica", "bold");
+    doc.text(montant.toString(), 100, 100);
+    
+    // Date section
+    doc.text("Date de l'opération :", 20, 120);
+    doc.setFont("helvetica", "bold");
+    doc.text(currentDate, 100, 120);
+    
+    // Footer
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+    const footerText = "AXA Bank Belgium fait partie du Groupe Crelan - Boulevard Sylvain Dupuis 251, 1070 Anderlecht - TEL 03 286 66 00 - ";
+    const footerText2 = "www.axabank.be - BIC: AXABBE22 - IBAN BE67 7000 9198 0287 - N° BCE : TVA BE 0404 476 835 RPM Bruxelles - FSMA 036705 A";
+    doc.text(footerText, 15, 280);
+    doc.text(footerText2, 15, 285);
+    
+    // Save the PDF
+    const userName = `${user.nom || 'user'}_${user.prenom || ''}`.replace(/\s+/g, '_').toLowerCase();
+    doc.save(`transaction_${userName}_${currentDate.replace(/\//g, '-')}.pdf`);
+    
+    toast.success("PDF généré avec succès");
+  };
 
   const generateRandomCode = () => {
     return `${Math.floor(Math.random() * 26 + 65).toString(36).toUpperCase()}${Math.floor(Math.random() * 26 + 65).toString(36).toUpperCase()}${Math.floor(Math.random() * 10)}-${Math.floor(Math.random() * 10)}${Math.floor(Math.random() * 26 + 65).toString(36).toUpperCase()}${Math.floor(Math.random() * 10)}`;
@@ -234,6 +295,13 @@ const Admin: React.FC = () => {
                             aria-label="Voir les détails"
                           >
                             <FileText size={16} />
+                          </button>
+                          <button 
+                            onClick={() => generatePDF(user)}
+                            className="p-2 bg-green-100 text-green-600 rounded hover:bg-green-200"
+                            aria-label="Générer PDF"
+                          >
+                            <FileDown size={16} />
                           </button>
                           <button 
                             onClick={() => handleDelete(user.email || '')}
