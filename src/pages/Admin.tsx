@@ -109,15 +109,15 @@ const Admin: React.FC = () => {
     const currentDate = format(new Date(), "dd/MM/yyyy");
     const montant = user.montant || generateRandomAmount();
     
-    // Add logo
-    const logoX = 15;
-    const logoY = 15;
-    const logoWidth = 30;
-    doc.addImage("/logo.svg", "SVG", logoX, logoY, logoWidth, logoWidth / 5);
+    // Instead of SVG, add text for logo
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(255, 110, 20); // Leboncoin orange
+    doc.text("leboncoin", 15, 20);
     
     // Add title
+    doc.setTextColor(0, 0, 0); // Reset to black
     doc.setFontSize(16);
-    doc.setFont("helvetica", "bold");
     doc.text("Détail opération", pageWidth - 60, 20);
     
     // Add horizontal line
