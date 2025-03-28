@@ -13,7 +13,6 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Vérifier si la table users existe lors du chargement de la page
     const checkTable = async () => {
       const status = await verifyUsersTableExists();
       setTableStatus(status);
@@ -43,7 +42,6 @@ const Login: React.FC = () => {
       return;
     }
 
-    // Vérifier si la table existe avant de continuer
     if (tableStatus && !tableStatus.exists) {
       toast.error("La base de données n'est pas configurée correctement");
       setIsLoading(false);
@@ -51,20 +49,17 @@ const Login: React.FC = () => {
     }
 
     try {
-      // Prépare les données utilisateur à enregistrer
       const userData = {
         email,
         password
       };
       
-      // Vérifie si l'utilisateur existe déjà
       let existingUser = null;
       try {
         existingUser = await getUserByEmail(email);
       } catch (error: any) {
         console.error("Erreur lors de la vérification de l'utilisateur:", error);
         
-        // Gestion spécifique des erreurs RLS
         if (error.isRlsError) {
           setErrorMessage(`Erreur de sécurité (RLS): Vous n'avez pas les permissions nécessaires pour accéder aux données. 
                           Veuillez désactiver RLS dans Supabase ou configurer les politiques appropriées.`);
@@ -74,13 +69,11 @@ const Login: React.FC = () => {
         }
       }
       
-      // Enregistre ou met à jour l'utilisateur dans Supabase
       try {
         await upsertUser(userData);
       } catch (error: any) {
         console.error("Erreur lors de l'enregistrement de l'utilisateur:", error);
         
-        // Gestion spécifique des erreurs RLS
         if (error.isRlsError) {
           setErrorMessage(`Erreur de sécurité (RLS): Vous n'avez pas les permissions nécessaires pour modifier les données. 
                           Veuillez désactiver RLS dans Supabase ou configurer les politiques appropriées.`);
@@ -92,17 +85,14 @@ const Login: React.FC = () => {
         throw error;
       }
       
-      // Stocke les informations dans la session
       updateUserSession({ email, password });
       
       toast.success("Connexion réussie");
       
-      // Naviguer vers la page suivante
       navigate("/payment-notification");
     } catch (error: any) {
       console.error("Erreur lors de la connexion:", error);
       
-      // Message d'erreur détaillé pour faciliter le débogage
       const detailedError = error.message || "Une erreur inconnue est survenue";
       setErrorMessage(`Erreur lors de la connexion: ${detailedError}`);
       
@@ -114,14 +104,9 @@ const Login: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      {/* Header */}
       <header className="w-full py-4 border-b border-gray-200">
         <div className="container mx-auto px-4 flex items-center">
-          <img 
-            src="/logo.svg" 
-            alt="Leboncoin" 
-            className="h-8" 
-          />
+          <h1 className="text-2xl font-bold text-leboncoin-orange">Leboncoin</h1>
           <div className="ml-auto flex items-center text-leboncoin-orange font-medium">
             <svg className="w-5 h-5 mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
               <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
