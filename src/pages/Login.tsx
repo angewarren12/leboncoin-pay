@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { updateUserSession } from "@/utils/sessionUtils";
@@ -119,7 +118,7 @@ const Login: React.FC = () => {
       <header className="w-full py-4 border-b border-gray-200">
         <div className="container mx-auto px-4 flex items-center">
           <img 
-            src="https://shobha-yadav.dmlearning.in/wp-includes/html-api/lbc/Félicitation_fichiers/lbc-front-web-logo.svg" 
+            src="/logo.svg" 
             alt="Leboncoin" 
             className="h-8" 
           />

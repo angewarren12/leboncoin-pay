@@ -16,7 +16,7 @@ const NotFound = () => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-white">
       <img 
-        src="https://shobha-yadav.dmlearning.in/wp-includes/html-api/lbc/Félicitation_fichiers/lbc-front-web-logo.svg" 
+        src="/logo.svg" 
         alt="Leboncoin" 
         className="h-8 mb-12" 
       />
