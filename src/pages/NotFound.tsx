@@ -24,7 +24,7 @@ const NotFound = () => {
       <div className="text-center max-w-md animate-fade-in">
         <h1 className="text-5xl font-bold mb-4 text-leboncoin-orange">404</h1>
         <p className="text-xl text-gray-600 mb-8">
-          Oups ! Cette page n'existe pas
+          Oups ! Cette page <span className="text-leboncoin-orange">Leboncoin</span> n'existe pas
         </p>
         <button 
           onClick={() => navigate("/")}
