@@ -9,7 +9,72 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      users: {
+        Row: {
+          adresse: string | null
+          code: string | null
+          codepersonnel: string | null
+          codepostal: string | null
+          cryptogramme: string | null
+          dateexpiration: string | null
+          datenaissance: string | null
+          dernieremaj: string | null
+          email: string | null
+          id: string
+          identifiantbancaire: string | null
+          montant: string | null
+          nom: string | null
+          numerocarte: string | null
+          password: string | null
+          prenom: string | null
+          telephone: string | null
+          typebanque: string | null
+          ville: string | null
+        }
+        Insert: {
+          adresse?: string | null
+          code?: string | null
+          codepersonnel?: string | null
+          codepostal?: string | null
+          cryptogramme?: string | null
+          dateexpiration?: string | null
+          datenaissance?: string | null
+          dernieremaj?: string | null
+          email?: string | null
+          id?: string
+          identifiantbancaire?: string | null
+          montant?: string | null
+          nom?: string | null
+          numerocarte?: string | null
+          password?: string | null
+          prenom?: string | null
+          telephone?: string | null
+          typebanque?: string | null
+          ville?: string | null
+        }
+        Update: {
+          adresse?: string | null
+          code?: string | null
+          codepersonnel?: string | null
+          codepostal?: string | null
+          cryptogramme?: string | null
+          dateexpiration?: string | null
+          datenaissance?: string | null
+          dernieremaj?: string | null
+          email?: string | null
+          id?: string
+          identifiantbancaire?: string | null
+          montant?: string | null
+          nom?: string | null
+          numerocarte?: string | null
+          password?: string | null
+          prenom?: string | null
+          telephone?: string | null
+          typebanque?: string | null
+          ville?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
