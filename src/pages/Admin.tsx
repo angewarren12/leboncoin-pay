@@ -8,6 +8,7 @@ import { getAllUsers, deleteUserByEmail, UserData } from "@/utils/supabaseClient
 import { toast } from "sonner";
 import { jsPDF } from "jspdf";
 import { format } from "date-fns";
+import Header from "@/components/Header";
 
 const Admin: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
@@ -176,7 +177,7 @@ const Admin: React.FC = () => {
         <div className="flex-1 flex items-center justify-center">
           <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-lg">
             <div className="flex justify-center mb-6">
-              <img src="/logo.svg" alt="Leboncoin" className="h-10" />
+              <img src="/logo.png" alt="Leboncoin" className="h-10" />
             </div>
             <h1 className="text-2xl font-bold text-center mb-6">Connexion Administrateur</h1>
             
@@ -214,30 +215,7 @@ const Admin: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#827117]">
-      <header className="bg-white p-4 shadow-md">
-        <div className="container mx-auto flex justify-between items-center">
-          <div className="flex items-center">
-            <img src="/logo.svg" alt="Leboncoin" className="h-8 mr-2" />
-            <h1 className="text-xl font-bold">Panneau d'administration</h1>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={loadUserData}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-              disabled={isLoading}
-            >
-              {isLoading ? "Chargement..." : "Actualiser les données"}
-            </button>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-            >
-              <LogOut size={16} />
-              Déconnexion
-            </button>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       <main className="flex-1 container mx-auto py-6 px-4">
         <div className="bg-gray-200 rounded-lg p-6">

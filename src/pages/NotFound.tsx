@@ -1,6 +1,7 @@
 
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import Header from "@/components/Header";
 
 const NotFound = () => {
   const location = useLocation();
@@ -15,11 +16,7 @@ const NotFound = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-white">
-      <img 
-        src="/logo.svg" 
-        alt="Leboncoin" 
-        className="h-8 mb-12" 
-      />
+      <Header />
       
       <div className="text-center max-w-md animate-fade-in">
         <h1 className="text-5xl font-bold mb-4 text-leboncoin-orange">404</h1>

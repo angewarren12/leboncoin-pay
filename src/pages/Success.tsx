@@ -1,6 +1,7 @@
 
 import React, { useEffect, useState } from "react";
 import Footer from "@/components/Footer";
+import Header from "@/components/Header";
 import { getFromSession } from "@/utils/sessionUtils";
 import { useNavigate } from "react-router-dom";
 
@@ -29,17 +30,7 @@ const Success: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      {/* Header */}
-      <header className="w-full py-4 border-b border-gray-200">
-        <div className="container mx-auto px-4">
-          <img 
-            src="/logo.svg" 
-            alt="Leboncoin" 
-            className="h-8" 
-          />
-        </div>
-      </header>
-
+      <Header />
       <main className="flex-1 flex flex-col items-center justify-center p-4 py-8">
         <div className="w-full max-w-2xl px-6 py-8 bg-white rounded-lg text-center">
           <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
