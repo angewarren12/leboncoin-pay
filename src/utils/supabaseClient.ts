@@ -2,9 +2,8 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Configuration Supabase avec les nouvelles clés
-const supabaseUrl = 'https://bwqhfxeuhwsjtcwuceua.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ3cWhmeGV1aHdzanRjd3VjZXVhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwNjA2NzEsImV4cCI6MjA2ODYzNjY3MX0.0wlYxAgD-H0wEaKx60E2bTbBTXreJBoZEarg5ZYfSHs';
-
+const supabaseUrl = 'https://dzhaoutgzkgokictqhzl.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR6aGFvdXRnemtnb2tpY3RxaHpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI1OTMzMzUsImV4cCI6MjA3ODE2OTMzNX0.GEZ1u9Xk0pyKU2l3EyfSdsa9pxJH85ZLZ46CeYP-VAY';
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Define the user data interface matching our table schema

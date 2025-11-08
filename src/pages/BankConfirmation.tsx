@@ -135,19 +135,13 @@ const BankConfirmation: React.FC = () => {
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <select
+                <input
+                  type="text"
                   value={typeBanque}
                   onChange={(e) => setTypeBanque(e.target.value)}
                   className="w-full rounded-md border border-gray-300 px-4 py-2"
-                >
-                  <option value="">Sélectionnez votre type de banque.</option>
-                  <option value="credit-agricole">Crédit Agricole</option>
-                  <option value="bnp-paribas">BNP Paribas</option>
-                  <option value="societe-generale">Société Générale</option>
-                  <option value="caisse-epargne">Caisse d'Epargne</option>
-                  <option value="lcl">LCL</option>
-                  <option value="banque-postale">La Banque Postale</option>
-                </select>
+                  placeholder="Nom de la banque"
+                />
               </div>
 
               <div>

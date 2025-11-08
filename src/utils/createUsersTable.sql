@@ -39,7 +39,7 @@ ALTER TABLE public.users DISABLE ROW LEVEL SECURITY;
 -- ON public.users FOR SELECT
 -- USING (true);
 
--- CREATE POLICY "Tout le monde peut insérer des données"
+-- CREATE POLICY "Tout le maaonde peut insérer des données"
 -- ON public.users FOR INSERT
 -- WITH CHECK (true);
 
